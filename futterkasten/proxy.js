@@ -8,11 +8,13 @@ const http = require('http');
 
 const NEXT_PORT = 3000;
 const PROXY_PORT = 8099;
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
 
-function makeRequest(req, res, retries = 0) {
+const server = http.createServer((req, res) => {
+  const clientIP = req.socket.remoteAddress;
   const ingressPath = req.headers['x-ingress-path'] || '';
+  
+  console.log(`[PROXY] ${req.method} ${req.url} from ${clientIP}`);
+  console.log(`[PROXY] X-Ingress-Path: ${ingressPath}`);
   
   const options = {
     hostname: '127.0.0.1',
@@ -22,96 +24,56 @@ function makeRequest(req, res, retries = 0) {
     headers: { ...req.headers, host: `127.0.0.1:${NEXT_PORT}` }
   };
 
-  console.log(`[PROXY] Forwarding to Next.js: ${options.method} ${options.path}`);
-
   const proxyReq = http.request(options, (proxyRes) => {
-    console.log(`[PROXY] Next.js response: ${proxyRes.statusCode} ${proxyRes.headers['content-type']}`);
-
     const contentType = proxyRes.headers['content-type'] || '';
-    const isHtml = contentType.includes('text/html');
+    console.log(`[PROXY] Next.js: ${proxyRes.statusCode} ${contentType}`);
     
-    if (isHtml && ingressPath) {
-      // Collect HTML response and modify it
-      let body = '';
-      proxyRes.on('data', chunk => body += chunk);
+    // For HTML responses, collect and modify
+    if (contentType.includes('text/html') && ingressPath) {
+      let body = [];
+      proxyRes.on('data', chunk => body.push(chunk));
       proxyRes.on('end', () => {
-        try {
-          // Add <base> tag to head and rewrite asset URLs
-          let modified = body;
-          
-          // Insert base tag after <head>
-          if (!modified.includes('<base')) {
-            modified = modified.replace(/<head([^>]*)>/i, `<head$1><base href="${ingressPath}/">`);
+        let html = Buffer.concat(body).toString('utf8');
+        
+        // Insert base tag
+        html = html.replace(/<head>/i, `<head><base href="${ingressPath}/">`);
+        
+        // Rewrite URLs
+        html = html.replace(/href="\//g, `href="${ingressPath}/`);
+        html = html.replace(/src="\//g, `src="${ingressPath}/`);
+        html = html.replace(/"(\/_next\/)/g, `"${ingressPath}$1`);
+        
+        const buffer = Buffer.from(html, 'utf8');
+        
+        // Copy headers but fix content-length
+        const headers = {};
+        for (const [key, value] of Object.entries(proxyRes.headers)) {
+          if (key.toLowerCase() !== 'transfer-encoding') {
+            headers[key] = value;
           }
-          
-          // Rewrite absolute URLs to relative
-          modified = modified.replace(/href="\//g, `href="${ingressPath}/`);
-          modified = modified.replace(/src="\//g, `src="${ingressPath}/`);
-          modified = modified.replace(/"(\/_next\/)/g, `"${ingressPath}$1`);
-          
-          // Update headers for proper response
-          const newHeaders = { ...proxyRes.headers };
-          delete newHeaders['transfer-encoding'];
-          delete newHeaders['connection'];
-          newHeaders['content-length'] = Buffer.byteLength(modified);
-          newHeaders['connection'] = 'keep-alive';
-          
-          console.log(`[PROXY] Sending modified HTML (${modified.length} bytes)`);
-          res.writeHead(proxyRes.statusCode, newHeaders);
-          res.end(modified);
-          console.log(`[PROXY] Response sent successfully`);
-        } catch (err) {
-          console.error(`[PROXY] Error modifying HTML:`, err);
-          res.writeHead(500);
-          res.end('Internal proxy error');
         }
-      });
-      proxyRes.on('error', (err) => {
-        console.error(`[PROXY] proxyRes error:`, err);
+        headers['content-length'] = buffer.length;
+        
+        console.log(`[PROXY] Sending ${buffer.length} bytes HTML`);
+        res.writeHead(proxyRes.statusCode, headers);
+        res.end(buffer);
       });
     } else {
-      // Pass through non-HTML responses
-      console.log(`[PROXY] Passing through non-HTML response`);
+      // Pass through other responses
       res.writeHead(proxyRes.statusCode, proxyRes.headers);
       proxyRes.pipe(res);
     }
   });
 
   proxyReq.on('error', (err) => {
-    console.error(`Proxy error (attempt ${retries + 1}):`, err.message);
-    if (retries < MAX_RETRIES) {
-      setTimeout(() => makeRequest(req, res, retries + 1), RETRY_DELAY);
-    } else {
-      res.writeHead(502, { 'Content-Type': 'text/html' });
-      res.end(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>Futterkasten</title></head>
-        <body style="font-family: sans-serif; padding: 20px;">
-          <h1>Futterkasten</h1>
-          <p>The add-on is starting up, please wait...</p>
-          <script>setTimeout(() => location.reload(), 3000);</script>
-        </body>
-        </html>
-      `);
-    }
+    console.error(`[PROXY] Error: ${err.message}`);
+    res.writeHead(502);
+    res.end('Bad Gateway');
   });
 
-  // Don't pipe request body for retries
-  if (retries === 0) {
-    req.pipe(proxyReq);
-  } else {
-    proxyReq.end();
-  }
-}
-
-const server = http.createServer((req, res) => {
-  const clientIP = req.socket.remoteAddress;
-  console.log(`[PROXY] ${req.method} ${req.url} from ${clientIP} - X-Ingress-Path: ${req.headers['x-ingress-path'] || 'none'}`);
-  makeRequest(req, res);
+  req.pipe(proxyReq);
 });
 
-// Listen on all interfaces - HA Ingress connects from 172.30.32.2
 server.listen(PROXY_PORT, () => {
   console.log(`Ingress proxy listening on port ${PROXY_PORT}`);
 });
