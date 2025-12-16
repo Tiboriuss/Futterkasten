@@ -30,6 +30,6 @@ node server.js &
 bashio::log.info "Waiting for Next.js to start..."
 sleep 3
 
-# Start the ingress proxy (foreground to keep container running)
-bashio::log.info "Starting ingress proxy..."
-exec node /app/proxy.js
+# Start nginx (foreground to keep container running)
+bashio::log.info "Starting nginx ingress proxy..."
+exec nginx

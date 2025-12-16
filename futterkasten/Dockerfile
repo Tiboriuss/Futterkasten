@@ -1,7 +1,8 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/base:stable
 FROM ${BUILD_FROM}
 
-RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx
+RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx \
+    && mkdir -p /run/nginx
 
 WORKDIR /app
 
@@ -21,11 +22,11 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cp -r /tmp/app/node_modules/@prisma /app/node_modules/@prisma \
     && rm -rf /tmp/app
 
-# Install prisma CLI and http-proxy for ingress
-RUN npm install -g prisma@7.1.0 && npm install http-proxy
+# Install prisma CLI
+RUN npm install -g prisma@7.1.0
 
-# Copy proxy and run script
-COPY proxy.js /app/proxy.js
+# Copy nginx config and run script
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
