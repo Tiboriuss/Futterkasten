@@ -22,7 +22,11 @@ function makeRequest(req, res, retries = 0) {
     headers: { ...req.headers, host: `127.0.0.1:${NEXT_PORT}` }
   };
 
+  console.log(`[PROXY] Forwarding to Next.js: ${options.method} ${options.path}`);
+
   const proxyReq = http.request(options, (proxyRes) => {
+    console.log(`[PROXY] Next.js response: ${proxyRes.statusCode} ${proxyRes.headers['content-type']}`);
+
     const contentType = proxyRes.headers['content-type'] || '';
     const isHtml = contentType.includes('text/html');
     
