@@ -32,6 +32,7 @@ export async function getMealsForWeek(date: Date) {
     })
     return { success: true, data: meals }
   } catch (error) {
+    console.error("Get Meals For Week Error:", error)
     return { success: false, error: "Failed to fetch meals" }
   }
 }
@@ -96,6 +97,7 @@ export async function removeMeal(id: string) {
     revalidatePath("/planner")
     return { success: true }
   } catch (error) {
+    console.error("Remove Meal Error:", error)
     return { success: false, error: "Failed to remove meal" }
   }
 }

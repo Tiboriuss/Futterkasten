@@ -9,7 +9,7 @@ POSTGRES_USER=$(bashio::config 'POSTGRES_USER')
 POSTGRES_PASSWORD=$(bashio::config 'POSTGRES_PASSWORD')
 POSTGRES_DB=$(bashio::config 'POSTGRES_DB')
 
-bashio::log.info "Starting Futterkasten version 1.0.38..."
+bashio::log.info "Starting Futterkasten version 1.0.40..."
 bashio::log.info "Configuring environment..."
 bashio::log.info "POSTGRES_HOST: $POSTGRES_HOST"
 bashio::log.info "POSTGRES_PORT: $POSTGRES_PORT"

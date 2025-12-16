@@ -11,7 +11,6 @@ ARG CACHEBUST=20251216-final2
 # Clone the repository and build
 RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cd /tmp/app \
-    && rm -f prisma.config.ts \
     && npm ci \
     && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate \
     && NEXT_TELEMETRY_DISABLED=1 npm run build \
@@ -24,7 +23,7 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && rm -rf /tmp/app
 
 # Install prisma CLI
-RUN npm install -g prisma@7.1.0
+RUN npm install -g prisma@5.22.0
 
 # Copy nginx config and run script
 COPY nginx.conf /etc/nginx/nginx.conf
