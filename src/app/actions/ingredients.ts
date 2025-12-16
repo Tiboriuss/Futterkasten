@@ -30,6 +30,7 @@ export async function createIngredient(data: z.infer<typeof ingredientSchema>) {
     revalidatePath("/ingredients")
     return { success: true, data: ingredient }
   } catch (error) {
+    console.error("createIngredient error:", error)
     return { success: false, error: "Fehler beim Erstellen der Zutat" }
   }
 }
