@@ -87,6 +87,7 @@ function makeRequest(req, res, retries = 0) {
 }
 
 const server = http.createServer((req, res) => {
+  console.log(`[PROXY] ${req.method} ${req.url} - X-Ingress-Path: ${req.headers['x-ingress-path'] || 'none'}`);
   makeRequest(req, res);
 });
 
