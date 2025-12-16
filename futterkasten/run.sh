@@ -24,6 +24,10 @@ export HOSTNAME="127.0.0.1"
 
 cd /app
 
+# Debug: Show schema content
+bashio::log.info "Checking schema content..."
+cat ./prisma/schema.prisma
+
 # Push schema to database
 bashio::log.info "Syncing database schema..."
 prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || bashio::log.warning "Schema push failed, continuing anyway..."
