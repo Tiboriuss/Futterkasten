@@ -8,12 +8,11 @@
   "init": false,
   "homeassistant_api": false,
   "host_network": false,
-  "ingress": true,
-  "ingress_port": 3000,
+  "ingress": false,
   "panel_icon": "mdi:food",
   "panel_title": "Futterkasten",
   "ports": {
-    "3000/tcp": null
+    "3000/tcp": 3000
   },
   "ports_description": {
     "3000/tcp": "Web interface"
