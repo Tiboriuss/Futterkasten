@@ -41,6 +41,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
@@ -109,7 +110,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
     name: dish?.name || "",
     description: dish?.description || "",
     suitableFor: (dish?.suitableFor as ("BREAKFAST" | "LUNCH" | "DINNER" | "SNACK")[]) || [],
-    ingredients: dish?.ingredients.map(di => ({
+    ingredients: dish?.ingredients.map((di: any) => ({
       ingredientId: di.ingredientId,
       amount: di.amount
     })) || [],
@@ -395,6 +396,9 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Neue Zutat erstellen</DialogTitle>
+            <DialogDescription className="sr-only">
+              Erstelle eine neue Zutat für dein Gericht.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">

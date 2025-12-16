@@ -12,13 +12,21 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DishForm } from "./dish-form"
 import ReactMarkdown from "react-markdown"
 
 // Define a type that includes the relation
-interface DishWithIngredients extends Dish {
+interface DishWithIngredients {
+  id: string
+  name: string
+  description: string | null
+  suitableFor: string[]
+  createdAt: Date
+  updatedAt: Date
+  userId: string
   ingredients: (DishIngredient & {
     ingredient: Ingredient
   })[]
@@ -93,6 +101,9 @@ export function DishList({ dishes, availableIngredients }: DishListProps) {
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Gericht bearbeiten</DialogTitle>
+                            <DialogDescription className="sr-only">
+                                Bearbeite die Details des Gerichts.
+                            </DialogDescription>
                         </DialogHeader>
                         <DishForm 
                             availableIngredients={availableIngredients} 

@@ -29,6 +29,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 
 type DishWithIngredients = Dish & { 
@@ -166,13 +167,16 @@ function PlannerSlot({ date, type, meal, dishes }: { date: Date, type: MealType,
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-xl">{meal.dish.name}</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Details zum Gericht {meal.dish.name}
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 {meal.dish.ingredients.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-2">Zutaten</h4>
                     <ul className="space-y-1">
-                      {meal.dish.ingredients.map((di) => (
+                      {meal.dish.ingredients.map((di: any) => (
                         <li key={di.id} className="text-sm flex justify-between">
                           <span>{di.ingredient.name}</span>
                           <span className="text-muted-foreground">{di.amount} {di.ingredient.unit}</span>

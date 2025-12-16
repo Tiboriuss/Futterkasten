@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DishForm } from "./dish-form"
@@ -30,6 +31,9 @@ export function DishCreateButton({ availableIngredients }: DishCreateButtonProps
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Neues Gericht erstellen</DialogTitle>
+          <DialogDescription className="sr-only">
+            Fülle das Formular aus, um ein neues Gericht zu erstellen.
+          </DialogDescription>
         </DialogHeader>
         <DishForm 
           availableIngredients={availableIngredients} 

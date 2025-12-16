@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { IngredientForm } from "./ingredient-form"
@@ -85,6 +86,9 @@ export function IngredientList({ ingredients }: IngredientListProps) {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Zutat bearbeiten</DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Bearbeite die Details deiner Zutat.
+                        </DialogDescription>
                     </DialogHeader>
                     <IngredientForm ingredient={ingredient} afterSave={() => setEditingId(null)} />
                 </DialogContent>
