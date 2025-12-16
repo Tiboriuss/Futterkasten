@@ -10,7 +10,7 @@ export function MainNav({
       {...props}
     >
       <a
-        href="/"
+        href="/planner"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
         Wochenplaner
