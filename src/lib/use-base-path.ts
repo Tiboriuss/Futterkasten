@@ -7,17 +7,28 @@ import { useState, useEffect } from "react"
  * Returns the ingress path prefix if running under HA Ingress, empty string otherwise
  */
 export function useBasePath(): string {
-  const [basePath, setBasePath] = useState("")
+  const [basePath, setBasePath] = useState(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname
+      // Check if we're running under HA Ingress
+      // Pattern: /api/hassio_ingress/{token}/...
+      const match = path.match(/^(\/api\/hassio_ingress\/[^/]+)/)
+      return match ? match[1] : ""
+    }
+    return ""
+  })
   
   useEffect(() => {
-    const path = window.location.pathname
-    // Check if we're running under HA Ingress
-    // Pattern: /api/hassio_ingress/{token}/...
-    const match = path.match(/^(\/api\/hassio_ingress\/[^/]+)/)
-    if (match) {
-      setBasePath(match[1])
+    // Keep the effect for updates if needed, though usually path prefix is static per session
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname
+      const match = path.match(/^(\/api\/hassio_ingress\/[^/]+)/)
+      const newPath = match ? match[1] : ""
+      if (newPath !== basePath) {
+        setBasePath(newPath)
+      }
     }
-  }, [])
+  }, [basePath])
   
   return basePath
 }

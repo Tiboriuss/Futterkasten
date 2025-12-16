@@ -82,5 +82,13 @@ export async function POST(req: Request) {
     `,
   })
 
-  return result.toUIMessageStreamResponse()
+  const response = result.toUIMessageStreamResponse()
+  
+  // Ensure headers for real-time streaming in HA Ingress
+  response.headers.set('Content-Type', 'text/event-stream')
+  response.headers.set('Cache-Control', 'no-cache, no-transform')
+  response.headers.set('Connection', 'keep-alive')
+  response.headers.set('X-Accel-Buffering', 'no') // Disable HA Proxy buffering
+  
+  return response
 }

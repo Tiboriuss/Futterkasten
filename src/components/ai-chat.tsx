@@ -36,9 +36,13 @@ export function AIChat() {
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
   const [hasRefreshed, setHasRefreshed] = useState<Set<string>>(new Set())
+  const basePath = useBasePath()
+  const apiEndpoint = `${basePath}/api/chat`
+  
   const chat = useChat({
-    onError: (error) => console.error("Chat error:", error),
-  }) as any
+    api: apiEndpoint,
+    onError: (error: any) => console.error("Chat error:", error),
+  } as any)
   
   // Destructure available properties. fallback to safe defaults.
   const { messages = [], sendMessage, status } = chat
@@ -46,8 +50,6 @@ export function AIChat() {
   // Derive isLoading from status if available, otherwise fallback to false
   const isLoading = status === "submitted" || status === "streaming"
 
-  const basePath = useBasePath()
-  
   // Custom markdown components to handle link rewriting
   const markdownComponents: Components = {
     a: ({ node, href, ...props }) => {
@@ -64,7 +66,7 @@ export function AIChat() {
   useEffect(() => {
     for (const message of messages) {
       if (message.role !== 'assistant') continue
-      for (const part of message.parts || []) {
+      for (const part of (message.parts || []) as any[]) {
         if (part.type?.startsWith('tool-') && part.state === 'output-available') {
           const output = typeof part.output === 'string' ? part.output : JSON.stringify(part.output)
           if (output?.includes('[REFRESH]') && !hasRefreshed.has(part.toolCallId)) {
@@ -82,8 +84,8 @@ export function AIChat() {
   // Check if AI stopped mid-task (has tool calls but no text response and not loading)
   const lastMessage = messages[messages.length - 1]
   const hasIncompleteToolCalls = lastMessage?.role === 'assistant' && 
-    lastMessage?.parts?.some((p: any) => p.type?.startsWith('tool-') && p.state === 'output-available') &&
-    !lastMessage?.parts?.some((p: any) => p.type === 'text' && p.text?.trim())
+    (lastMessage?.parts as any[])?.some((p: any) => p.type?.startsWith('tool-') && p.state === 'output-available') &&
+    !(lastMessage?.parts as any[])?.some((p: any) => p.type === 'text' && p.text?.trim())
   const canContinue = !isLoading && hasIncompleteToolCalls
   
   const handleContinue = async () => {
