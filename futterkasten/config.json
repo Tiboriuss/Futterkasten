@@ -1,0 +1,39 @@
+{
+  "name": "Futterkasten",
+  "description": "Meal planning app with AI assistant",
+  "version": "1.0.0",
+  "slug": "futterkasten",
+  "url": "https://github.com/Tiboriuss/Futterkasten",
+  "arch": ["amd64", "aarch64"],
+  "init": false,
+  "homeassistant_api": false,
+  "host_network": false,
+  "ingress": true,
+  "ingress_port": 3000,
+  "panel_icon": "mdi:food",
+  "panel_title": "Futterkasten",
+  "ports": {
+    "3000/tcp": null
+  },
+  "ports_description": {
+    "3000/tcp": "Web interface"
+  },
+  "options": {
+    "AZURE_OPENAI_API_KEY": "",
+    "AZURE_OPENAI_ENDPOINT": "",
+    "POSTGRES_HOST": "core-mariadb",
+    "POSTGRES_PORT": 5432,
+    "POSTGRES_USER": "futterkasten",
+    "POSTGRES_PASSWORD": "",
+    "POSTGRES_DB": "futterkasten"
+  },
+  "schema": {
+    "AZURE_OPENAI_API_KEY": "str",
+    "AZURE_OPENAI_ENDPOINT": "url",
+    "POSTGRES_HOST": "str",
+    "POSTGRES_PORT": "port",
+    "POSTGRES_USER": "str",
+    "POSTGRES_PASSWORD": "str",
+    "POSTGRES_DB": "str"
+  }
+}
