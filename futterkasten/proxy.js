@@ -34,12 +34,16 @@ proxy.on('proxyRes', (proxyRes, req, res) => {
       
       const buffer = Buffer.from(html, 'utf8');
       
-      // Set headers
-      res.writeHead(proxyRes.statusCode, {
-        ...proxyRes.headers,
-        'content-length': buffer.length,
-        'transfer-encoding': undefined
-      });
+      // Copy headers, excluding transfer-encoding
+      const headers = {};
+      for (const [key, value] of Object.entries(proxyRes.headers)) {
+        if (key.toLowerCase() !== 'transfer-encoding') {
+          headers[key] = value;
+        }
+      }
+      headers['content-length'] = buffer.length;
+      
+      res.writeHead(proxyRes.statusCode, headers);
       res.end(buffer);
     });
   } else {
