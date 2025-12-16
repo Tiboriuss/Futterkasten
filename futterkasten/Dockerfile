@@ -21,8 +21,8 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cp -r /tmp/app/node_modules/@prisma /app/node_modules/@prisma \
     && rm -rf /tmp/app
 
-# Install prisma CLI for db push
-RUN npm install -g prisma@7.1.0
+# Install prisma CLI and http-proxy for ingress
+RUN npm install -g prisma@7.1.0 && npm install http-proxy
 
 # Copy proxy and run script
 COPY proxy.js /app/proxy.js
