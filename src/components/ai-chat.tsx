@@ -9,7 +9,8 @@ import { MessageSquare, X, Send, Bot, User, Loader2, CheckCircle2, AlertCircle, 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import ReactMarkdown from "react-markdown"
+import ReactMarkdown, { Components } from "react-markdown"
+import { useBasePath } from "@/lib/use-base-path"
 
 // Tool name translations
 const toolNameLabels: Record<string, string> = {
@@ -44,6 +45,17 @@ export function AIChat() {
   
   // Derive isLoading from status if available, otherwise fallback to false
   const isLoading = status === "submitted" || status === "streaming"
+
+  const basePath = useBasePath()
+  
+  // Custom markdown components to handle link rewriting
+  const markdownComponents: Components = {
+    a: ({ node, href, ...props }) => {
+      const isInternal = href?.startsWith("/")
+      const finalHref = isInternal ? `${basePath}${href}` : href
+      return <a href={finalHref} {...props} target={isInternal ? undefined : "_blank"} rel={isInternal ? undefined : "noopener noreferrer"} />
+    }
+  }
 
   const [input, setInput] = useState<string>("")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -212,7 +224,7 @@ export function AIChat() {
                       {textContent && (
                         <div className="rounded-lg px-3 py-2 bg-muted">
                           <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_p]:my-1">
-                            <ReactMarkdown>
+                            <ReactMarkdown components={markdownComponents}>
                               {textContent}
                             </ReactMarkdown>
                           </div>
