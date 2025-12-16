@@ -14,7 +14,7 @@ export AZURE_OPENAI_API_KEY
 export AZURE_OPENAI_ENDPOINT
 export NODE_ENV=production
 export PORT=3000
-export HOSTNAME="0.0.0.0"
+export HOSTNAME="127.0.0.1"
 
 cd /app
 
@@ -22,6 +22,10 @@ cd /app
 bashio::log.info "Syncing database schema..."
 prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || bashio::log.warning "Schema push failed, continuing anyway..."
 
-# Start the server
+# Start nginx in background
+bashio::log.info "Starting nginx reverse proxy..."
+nginx
+
+# Start the Next.js server
 bashio::log.info "Starting Futterkasten..."
 exec node server.js
