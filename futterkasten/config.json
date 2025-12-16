@@ -11,6 +11,7 @@
   "ingress": false,
   "panel_icon": "mdi:food",
   "panel_title": "Futterkasten",
+  "webui": "http://[HOST]:[PORT:3000]",
   "ports": {
     "3000/tcp": 3000
   },
