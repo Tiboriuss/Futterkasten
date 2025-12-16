@@ -1,7 +1,7 @@
 {
   "name": "Futterkasten",
   "description": "Meal planning app with AI assistant",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "slug": "futterkasten",
   "url": "https://github.com/Tiboriuss/Futterkasten",
   "arch": ["amd64", "aarch64"],
@@ -21,6 +21,7 @@
   "options": {
     "AZURE_OPENAI_API_KEY": "",
     "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_RESOURCE_NAME": "",
     "POSTGRES_HOST": "core-mariadb",
     "POSTGRES_PORT": 5432,
     "POSTGRES_USER": "futterkasten",
@@ -30,6 +31,7 @@
   "schema": {
     "AZURE_OPENAI_API_KEY": "str",
     "AZURE_OPENAI_ENDPOINT": "url",
+    "AZURE_RESOURCE_NAME": "str?",
     "POSTGRES_HOST": "str",
     "POSTGRES_PORT": "port",
     "POSTGRES_USER": "str",
