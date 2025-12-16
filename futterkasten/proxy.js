@@ -49,10 +49,12 @@ function makeRequest(req, res, retries = 0) {
           modified = modified.replace(/src="\//g, `src="${ingressPath}/`);
           modified = modified.replace(/"(\/_next\/)/g, `"${ingressPath}$1`);
           
-          // Update content-length and remove transfer-encoding
+          // Update headers for proper response
           const newHeaders = { ...proxyRes.headers };
           delete newHeaders['transfer-encoding'];
+          delete newHeaders['connection'];
           newHeaders['content-length'] = Buffer.byteLength(modified);
+          newHeaders['connection'] = 'keep-alive';
           
           console.log(`[PROXY] Sending modified HTML (${modified.length} bytes)`);
           res.writeHead(proxyRes.statusCode, newHeaders);
