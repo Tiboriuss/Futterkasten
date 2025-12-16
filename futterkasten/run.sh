@@ -24,7 +24,7 @@ prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || bashio
 
 # Start the Next.js server in background
 bashio::log.info "Starting Futterkasten..."
-node server.js &
+DATABASE_URL="$DATABASE_URL" node server.js &
 
 # Wait for Next.js to be ready
 bashio::log.info "Waiting for Next.js to start..."
