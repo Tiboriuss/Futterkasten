@@ -19,6 +19,7 @@ export async function getDishes() {
     })
     return { success: true, data: dishes }
   } catch (error) {
+    console.error("Get Dishes Error:", error)
     return { success: false, error: "Fehler beim Laden der Gerichte" }
   }
 }
@@ -37,7 +38,7 @@ export async function createDish(data: z.infer<typeof dishSchema>) {
       data: {
         name,
         description,
-        suitableFor,
+        suitableFor: suitableFor,
         ingredients: {
           create: ingredients.map((item) => ({
             ingredientId: item.ingredientId,
@@ -109,6 +110,7 @@ export async function deleteDish(id: string) {
     revalidatePath("/dishes")
     return { success: true }
   } catch (error) {
+    console.error("Delete Dish Error:", error)
     return { success: false, error: "Fehler beim Löschen des Gerichts" }
   }
 }
