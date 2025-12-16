@@ -11,12 +11,10 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && npm ci \
     && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate \
     && NEXT_TELEMETRY_DISABLED=1 npm run build \
-    && cp -r /tmp/app/.next/standalone/* /app/ \
-    && mkdir -p /app/.next \
+    && cp -r /tmp/app/.next/standalone/. /app/ \
     && cp -r /tmp/app/.next/static /app/.next/static \
     && cp -r /tmp/app/public /app/public \
     && cp -r /tmp/app/prisma /app/prisma \
-    && mkdir -p /app/node_modules \
     && cp -r /tmp/app/node_modules/.prisma /app/node_modules/.prisma \
     && cp -r /tmp/app/node_modules/@prisma /app/node_modules/@prisma \
     && rm -rf /tmp/app
