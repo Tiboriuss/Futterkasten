@@ -9,6 +9,12 @@ POSTGRES_USER=$(bashio::config 'POSTGRES_USER')
 POSTGRES_PASSWORD=$(bashio::config 'POSTGRES_PASSWORD')
 POSTGRES_DB=$(bashio::config 'POSTGRES_DB')
 
+bashio::log.info "Configuring environment..."
+bashio::log.info "POSTGRES_HOST: $POSTGRES_HOST"
+bashio::log.info "POSTGRES_PORT: $POSTGRES_PORT"
+bashio::log.info "POSTGRES_USER: $POSTGRES_USER"
+bashio::log.info "POSTGRES_DB: $POSTGRES_DB"
+
 export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 export AZURE_OPENAI_API_KEY
 export AZURE_OPENAI_ENDPOINT
