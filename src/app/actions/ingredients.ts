@@ -50,6 +50,7 @@ export async function updateIngredient(id: string, data: z.infer<typeof ingredie
     revalidatePath("/ingredients")
     return { success: true, data: ingredient }
   } catch (error) {
+    console.error("updateIngredient error:", error)
     return { success: false, error: "Fehler beim Aktualisieren der Zutat" }
   }
 }
@@ -62,6 +63,7 @@ export async function deleteIngredient(id: string) {
     revalidatePath("/ingredients")
     return { success: true }
   } catch (error) {
+    console.error("deleteIngredient error:", error)
     return { success: false, error: "Fehler beim Löschen der Zutat" }
   }
 }
