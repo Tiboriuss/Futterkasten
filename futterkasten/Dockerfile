@@ -11,7 +11,8 @@ ARG CACHEBUST=20251216-final2
 # Clone the repository and build
 RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cd /tmp/app \
-    && npm ci \
+    && rm -f prisma.config.ts \
+    && npm install \
     && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate \
     && NEXT_TELEMETRY_DISABLED=1 npm run build \
     && cp -r /tmp/app/.next/standalone/. /app/ \
