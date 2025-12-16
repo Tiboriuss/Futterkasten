@@ -22,9 +22,9 @@ cd /app
 bashio::log.info "Syncing database schema..."
 prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || bashio::log.warning "Schema push failed, continuing anyway..."
 
-# Start nginx in background
-bashio::log.info "Starting nginx reverse proxy..."
-nginx
+# Start the ingress proxy in background
+bashio::log.info "Starting ingress proxy..."
+node /app/proxy.js &
 
 # Start the Next.js server
 bashio::log.info "Starting Futterkasten..."

@@ -24,8 +24,8 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
 # Install prisma CLI for db push
 RUN npm install -g prisma@7.1.0
 
-# Copy nginx config and run script
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy proxy and run script
+COPY proxy.js /app/proxy.js
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
