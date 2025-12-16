@@ -4,13 +4,15 @@
 AZURE_OPENAI_API_KEY=$(bashio::config 'AZURE_OPENAI_API_KEY')
 AZURE_OPENAI_ENDPOINT=$(bashio::config 'AZURE_OPENAI_ENDPOINT')
 AZURE_RESOURCE_NAME=$(bashio::config 'AZURE_RESOURCE_NAME')
+AZURE_OPENAI_DEPLOYMENT=$(bashio::config 'AZURE_OPENAI_DEPLOYMENT')
+AZURE_API_VERSION=$(bashio::config 'AZURE_API_VERSION')
 POSTGRES_HOST=$(bashio::config 'POSTGRES_HOST')
 POSTGRES_PORT=$(bashio::config 'POSTGRES_PORT')
 POSTGRES_USER=$(bashio::config 'POSTGRES_USER')
 POSTGRES_PASSWORD=$(bashio::config 'POSTGRES_PASSWORD')
 POSTGRES_DB=$(bashio::config 'POSTGRES_DB')
 
-bashio::log.info "Starting Futterkasten version 1.0.42..."
+bashio::log.info "Starting Futterkasten version 1.0.44..."
 bashio::log.info "Configuring environment..."
 bashio::log.info "POSTGRES_HOST: $POSTGRES_HOST"
 bashio::log.info "POSTGRES_PORT: $POSTGRES_PORT"
@@ -21,6 +23,8 @@ export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGR
 export AZURE_OPENAI_API_KEY
 export AZURE_OPENAI_ENDPOINT
 export AZURE_RESOURCE_NAME
+export AZURE_OPENAI_DEPLOYMENT
+export AZURE_API_VERSION
 export NODE_ENV=production
 export PORT=3000
 export HOSTNAME="127.0.0.1"
