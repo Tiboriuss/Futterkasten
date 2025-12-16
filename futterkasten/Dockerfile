@@ -1,7 +1,7 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/base:stable
 FROM ${BUILD_FROM}
 
-RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx nginx-mod-http-sub
+RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx
 
 WORKDIR /app
 
