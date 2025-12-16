@@ -35,28 +35,41 @@ function makeRequest(req, res, retries = 0) {
       let body = '';
       proxyRes.on('data', chunk => body += chunk);
       proxyRes.on('end', () => {
-        // Add <base> tag to head and rewrite asset URLs
-        let modified = body;
-        
-        // Insert base tag after <head>
-        if (!modified.includes('<base')) {
-          modified = modified.replace(/<head([^>]*)>/i, `<head$1><base href="${ingressPath}/">`);
+        try {
+          // Add <base> tag to head and rewrite asset URLs
+          let modified = body;
+          
+          // Insert base tag after <head>
+          if (!modified.includes('<base')) {
+            modified = modified.replace(/<head([^>]*)>/i, `<head$1><base href="${ingressPath}/">`);
+          }
+          
+          // Rewrite absolute URLs to relative
+          modified = modified.replace(/href="\//g, `href="${ingressPath}/`);
+          modified = modified.replace(/src="\//g, `src="${ingressPath}/`);
+          modified = modified.replace(/"(\/_next\/)/g, `"${ingressPath}$1`);
+          
+          // Update content-length and remove transfer-encoding
+          const newHeaders = { ...proxyRes.headers };
+          delete newHeaders['transfer-encoding'];
+          newHeaders['content-length'] = Buffer.byteLength(modified);
+          
+          console.log(`[PROXY] Sending modified HTML (${modified.length} bytes)`);
+          res.writeHead(proxyRes.statusCode, newHeaders);
+          res.end(modified);
+          console.log(`[PROXY] Response sent successfully`);
+        } catch (err) {
+          console.error(`[PROXY] Error modifying HTML:`, err);
+          res.writeHead(500);
+          res.end('Internal proxy error');
         }
-        
-        // Rewrite absolute URLs to relative
-        modified = modified.replace(/href="\//g, `href="${ingressPath}/`);
-        modified = modified.replace(/src="\//g, `src="${ingressPath}/`);
-        modified = modified.replace(/"(\/_next\/)/g, `"${ingressPath}$1`);
-        
-        // Update content-length
-        const newHeaders = { ...proxyRes.headers };
-        newHeaders['content-length'] = Buffer.byteLength(modified);
-        
-        res.writeHead(proxyRes.statusCode, newHeaders);
-        res.end(modified);
+      });
+      proxyRes.on('error', (err) => {
+        console.error(`[PROXY] proxyRes error:`, err);
       });
     } else {
       // Pass through non-HTML responses
+      console.log(`[PROXY] Passing through non-HTML response`);
       res.writeHead(proxyRes.statusCode, proxyRes.headers);
       proxyRes.pipe(res);
     }
