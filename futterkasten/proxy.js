@@ -8,8 +8,10 @@ const http = require('http');
 
 const NEXT_PORT = 3000;
 const PROXY_PORT = 8099;
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
 
-const server = http.createServer((req, res) => {
+function makeRequest(req, res, retries = 0) {
   const ingressPath = req.headers['x-ingress-path'] || '';
   
   const options = {
@@ -57,12 +59,35 @@ const server = http.createServer((req, res) => {
   });
 
   proxyReq.on('error', (err) => {
-    console.error('Proxy error:', err);
-    res.writeHead(502);
-    res.end('Bad Gateway');
+    console.error(`Proxy error (attempt ${retries + 1}):`, err.message);
+    if (retries < MAX_RETRIES) {
+      setTimeout(() => makeRequest(req, res, retries + 1), RETRY_DELAY);
+    } else {
+      res.writeHead(502, { 'Content-Type': 'text/html' });
+      res.end(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Futterkasten</title></head>
+        <body style="font-family: sans-serif; padding: 20px;">
+          <h1>Futterkasten</h1>
+          <p>The add-on is starting up, please wait...</p>
+          <script>setTimeout(() => location.reload(), 3000);</script>
+        </body>
+        </html>
+      `);
+    }
   });
 
-  req.pipe(proxyReq);
+  // Don't pipe request body for retries
+  if (retries === 0) {
+    req.pipe(proxyReq);
+  } else {
+    proxyReq.end();
+  }
+}
+
+const server = http.createServer((req, res) => {
+  makeRequest(req, res);
 });
 
 server.listen(PROXY_PORT, '0.0.0.0', () => {
