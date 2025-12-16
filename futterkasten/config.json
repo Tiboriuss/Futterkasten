@@ -1,7 +1,7 @@
 {
   "name": "Futterkasten",
   "description": "Meal planning app with AI assistant",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "slug": "futterkasten",
   "url": "https://github.com/Tiboriuss/Futterkasten",
   "arch": ["amd64", "aarch64"],
