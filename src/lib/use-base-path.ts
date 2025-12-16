@@ -1,21 +1,25 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState, useEffect } from "react"
 
 /**
  * Detects the base path for Home Assistant Ingress
  * Returns the ingress path prefix if running under HA Ingress, empty string otherwise
  */
 export function useBasePath(): string {
-  return useMemo(() => {
-    if (typeof window === "undefined") return ""
-    
+  const [basePath, setBasePath] = useState("")
+  
+  useEffect(() => {
     const path = window.location.pathname
     // Check if we're running under HA Ingress
     // Pattern: /api/hassio_ingress/{token}/...
     const match = path.match(/^(\/api\/hassio_ingress\/[^/]+)/)
-    return match ? match[1] : ""
+    if (match) {
+      setBasePath(match[1])
+    }
   }, [])
+  
+  return basePath
 }
 
 /**
