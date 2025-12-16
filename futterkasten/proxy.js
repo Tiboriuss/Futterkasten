@@ -87,10 +87,12 @@ function makeRequest(req, res, retries = 0) {
 }
 
 const server = http.createServer((req, res) => {
-  console.log(`[PROXY] ${req.method} ${req.url} - X-Ingress-Path: ${req.headers['x-ingress-path'] || 'none'}`);
+  const clientIP = req.socket.remoteAddress;
+  console.log(`[PROXY] ${req.method} ${req.url} from ${clientIP} - X-Ingress-Path: ${req.headers['x-ingress-path'] || 'none'}`);
   makeRequest(req, res);
 });
 
-server.listen(PROXY_PORT, '0.0.0.0', () => {
+// Listen on all interfaces - HA Ingress connects from 172.30.32.2
+server.listen(PROXY_PORT, () => {
   console.log(`Ingress proxy listening on port ${PROXY_PORT}`);
 });
