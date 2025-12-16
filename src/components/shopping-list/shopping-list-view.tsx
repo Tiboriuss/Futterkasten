@@ -20,6 +20,7 @@ interface ShoppingListItem {
 }
 import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from "next/navigation"
+import { useBasePath } from "@/lib/use-base-path"
 
 interface ShoppingListViewProps {
   initialData: ShoppingListItem[]
@@ -29,6 +30,7 @@ interface ShoppingListViewProps {
 
 export function ShoppingListView({ initialData, from, to }: ShoppingListViewProps) {
   const router = useRouter()
+  const basePath = useBasePath()
   const [date, setDate] = useState<{ from: Date; to: Date }>({
     from,
     to,
@@ -52,7 +54,7 @@ export function ShoppingListView({ initialData, from, to }: ShoppingListViewProp
         const params = new URLSearchParams()
         params.set("from", newRange.from.toISOString())
         params.set("to", newRange.to.toISOString())
-        router.push(`/shopping-list?${params.toString()}`)
+        router.push(`${basePath}/shopping-list?${params.toString()}`)
     }
   }
 
