@@ -68,7 +68,7 @@ export async function addMeal(data: z.infer<typeof createMealSchema>) {
       // Update existing
       await db.meal.update({
         where: { id: existingMeal.id },
-        data: { dishId },
+        data: { dishId, customName: null },
       })
     } else {
       // Create new
@@ -86,6 +86,59 @@ export async function addMeal(data: z.infer<typeof createMealSchema>) {
   } catch (error) {
     console.error("Add Meal Error:", error)
     return { success: false, error: "Failed to add meal" }
+  }
+}
+
+// Schema for custom meal (free-text, no dish)
+const createCustomMealSchema = z.object({
+  date: z.date(),
+  type: z.nativeEnum(MealType),
+  customName: z.string().min(1),
+})
+
+export async function addCustomMeal(data: z.infer<typeof createCustomMealSchema>) {
+  const result = createCustomMealSchema.safeParse(data)
+
+  if (!result.success) {
+    return { success: false, error: "Invalid data" }
+  }
+
+  const { date, type, customName } = result.data
+  const normalizedDate = startOfDay(date)
+
+  try {
+    // Check if meal exists for this slot
+    const existingMeal = await db.meal.findUnique({
+      where: {
+        date_type: {
+          date: normalizedDate,
+          type: type,
+        },
+      },
+    })
+
+    if (existingMeal) {
+      // Update existing - clear dishId and set customName
+      await db.meal.update({
+        where: { id: existingMeal.id },
+        data: { dishId: null, customName },
+      })
+    } else {
+      // Create new custom meal
+      await db.meal.create({
+        data: {
+          date: normalizedDate,
+          type,
+          customName,
+        },
+      })
+    }
+
+    revalidatePath("/planner")
+    return { success: true }
+  } catch (error) {
+    console.error("Add Custom Meal Error:", error)
+    return { success: false, error: "Failed to add custom meal" }
   }
 }
 

@@ -7,8 +7,9 @@ import { ChevronLeft, ChevronRight, Plus, Trash2, Check } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { MealType, Dish, Meal, DishIngredient, Ingredient } from "@prisma/client"
-import { addMeal, removeMeal } from "@/app/actions/planner"
+import { addMeal, addCustomMeal, removeMeal } from "@/app/actions/planner"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -36,9 +37,11 @@ type DishWithIngredients = Dish & {
   ingredients: (DishIngredient & { ingredient: Ingredient })[] 
 }
 
+type MealWithDish = Meal & { dish: DishWithIngredients | null, customName?: string | null }
+
 interface PlannerBoardProps {
   initialDate: Date
-  meals: (Meal & { dish: DishWithIngredients })[]
+  meals: MealWithDish[]
   dishes: DishWithIngredients[]
 }
 
@@ -158,16 +161,31 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
   )
 }
 
-function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date, type: MealType, meal?: Meal & { dish: DishWithIngredients }, dishes: DishWithIngredients[], compact?: boolean }) {
+function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date, type: MealType, meal?: MealWithDish, dishes: DishWithIngredients[], compact?: boolean }) {
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [customInput, setCustomInput] = useState("")
+  const [showCustomInput, setShowCustomInput] = useState(false)
 
   const handleAddMeal = async (dishId: string) => {
     await addMeal({ date, type, dishId })
     setSearchOpen(false)
     router.refresh()
   }
+
+  const handleAddCustomMeal = async () => {
+    if (!customInput.trim()) return
+    await addCustomMeal({ date, type, customName: customInput.trim() })
+    setCustomInput("")
+    setShowCustomInput(false)
+    setSearchOpen(false)
+    router.refresh()
+  }
+
+  // Get display name - either dish name or custom name
+  const displayName = meal?.dish?.name || meal?.customName || "Unbekannt"
+  const isCustomMeal = !meal?.dish && meal?.customName
 
   const handleRemove = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -185,12 +203,17 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
           <div className={cn("p-2 relative", compact ? "min-h-[60px]" : "min-h-[100px]")}>
               <div 
                 className={cn(
-                  "h-full w-full bg-accent/40 hover:bg-accent/60 rounded-md p-2 text-xs flex transition-colors border border-transparent hover:border-accent cursor-pointer",
+                  "h-full w-full rounded-md p-2 text-xs flex transition-colors border border-transparent cursor-pointer",
+                  isCustomMeal 
+                    ? "bg-muted/60 hover:bg-muted/80 hover:border-muted-foreground/30" 
+                    : "bg-accent/40 hover:bg-accent/60 hover:border-accent",
                   compact ? "flex-row items-center justify-between gap-2" : "flex-col justify-between"
                 )}
-                onClick={() => setDetailOpen(true)}
+                onClick={() => !isCustomMeal && setDetailOpen(true)}
               >
-                 <span className={cn("font-medium", compact ? "line-clamp-1" : "line-clamp-3")}>{meal.dish.name}</span>
+                 <span className={cn("font-medium", compact ? "line-clamp-1" : "line-clamp-3", isCustomMeal && "italic")}>
+                   {displayName}
+                 </span>
                  <Button 
                       type="button"
                       variant="ghost" 
@@ -207,49 +230,58 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
               </div>
           </div>
           
-          <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl">{meal.dish.name}</DialogTitle>
-                <DialogDescription className="sr-only">
-                  Details zum Gericht {meal.dish.name}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                {meal.dish.ingredients.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Zutaten</h4>
-                    <ul className="space-y-1">
-                      {meal.dish.ingredients.map((di: any) => (
-                        <li key={di.id} className="text-sm flex justify-between">
-                          <span>{di.ingredient.name}</span>
-                          <span className="text-muted-foreground">{di.amount} {di.ingredient.unit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {meal.dish.description && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Rezept</h4>
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{meal.dish.description}</ReactMarkdown>
+          {/* Only show dialog for dish-based meals */}
+          {meal.dish && (
+            <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-xl">{meal.dish.name}</DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Details zum Gericht {meal.dish.name}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {meal.dish.ingredients.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2">Zutaten</h4>
+                      <ul className="space-y-1">
+                        {meal.dish.ingredients.map((di: any) => (
+                          <li key={di.id} className="text-sm flex justify-between">
+                            <span>{di.ingredient.name}</span>
+                            <span className="text-muted-foreground">{di.amount} {di.ingredient.unit}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                )}
-                {!meal.dish.description && meal.dish.ingredients.length === 0 && (
-                  <p className="text-muted-foreground text-sm">Keine weiteren Details verfügbar.</p>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                  )}
+                  {meal.dish.description && (
+                    <div>
+                      <h4 className="font-semibold mb-2">Rezept</h4>
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{meal.dish.description}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                  {!meal.dish.description && meal.dish.ingredients.length === 0 && (
+                    <p className="text-muted-foreground text-sm">Keine weiteren Details verfügbar.</p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </>
       )
   }
 
   return (
     <div className={cn("p-2 flex items-center justify-center", compact ? "min-h-[60px]" : "min-h-[100px]")}>
-        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+        <Popover open={searchOpen} onOpenChange={(open) => {
+          setSearchOpen(open)
+          if (!open) {
+            setShowCustomInput(false)
+            setCustomInput("")
+          }
+        }}>
             <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
@@ -262,8 +294,38 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
                     <Plus className={compact ? "h-5 w-5" : "h-6 w-6"} />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0 w-[250px]" align="center">
-                <Command>
+            <PopoverContent className="p-0 w-[280px]" align="center">
+                {showCustomInput ? (
+                  <div className="p-3 space-y-3">
+                    <div className="text-sm font-medium">Eigener Eintrag</div>
+                    <Input
+                      placeholder="z.B. Essen gehen, Bei Freunden..."
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddCustomMeal()}
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => setShowCustomInput(false)}
+                      >
+                        Zurück
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={handleAddCustomMeal}
+                        disabled={!customInput.trim()}
+                      >
+                        Hinzufügen
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Command>
                     <CommandInput placeholder="Gericht suchen..." />
                     <CommandList>
                         <CommandEmpty>Kein Gericht gefunden.</CommandEmpty>
@@ -280,7 +342,19 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
                             ))}
                         </CommandGroup>
                     </CommandList>
-                </Command>
+                    <div className="border-t p-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full justify-start text-muted-foreground"
+                        onClick={() => setShowCustomInput(true)}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Eigener Eintrag...
+                      </Button>
+                    </div>
+                  </Command>
+                )}
             </PopoverContent>
         </Popover>
     </div>

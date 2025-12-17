@@ -101,8 +101,13 @@ model Meal {
   id        String   @id @default(cuid())
   date      DateTime
   type      MealType
-  dishId    String
-  dish      Dish     @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  
+  // Either linked to a dish OR free-text custom entry
+  dishId    String?
+  dish      Dish?    @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  
+  // For free-text entries like "Essen gehen Chinesisch" or "Bei Freunden"
+  customName String?
   
   // Optional: Track if this specific meal was cooked/eaten?
   completed Boolean  @default(false)

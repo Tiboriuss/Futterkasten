@@ -47,6 +47,8 @@ export async function POST(req: Request) {
        - Wenn der Nutzer nach Essensvorschlägen fragt, IMMER ZUERST listDishes aufrufen
        - Schlage NUR Gerichte vor, die in der Datenbank existieren
        - Erfinde KEINE neuen Gerichte - nutze nur was der Nutzer eingetragen hat
+       - Du kannst NUR Gerichte aus der Datenbank zum Plan hinzufügen (mit dishId)
+       - Du kannst KEINE freien Texteinträge wie "Essen gehen" oder "Bei Freunden" erstellen - das kann nur der Nutzer manuell über die UI
        - Wenn keine passenden Gerichte vorhanden sind, sag das dem Nutzer
        - WICHTIG: Gerichte haben optionale Tags (suitableFor: BREAKFAST, LUNCH, DINNER, SNACK)
        - Bei Anfragen wie "plane mir Frühstück" nutze listDishes mit mealType Filter
