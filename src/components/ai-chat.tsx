@@ -1,8 +1,8 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
-import { createWebSocketChatTransport } from "@/lib/websocket-chat-transport"
-import { useMemo } from "react"
+import { createWebSocketChatTransport, applyWebSocketFetchPatch } from "@/lib/websocket-chat-transport"
+import { useMemo, useLayoutEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -42,6 +42,13 @@ export function AIChat() {
   const apiEndpoint = `${basePath}/api/chat`
   
   const wsEndpoint = `${basePath}/api/chat/ws`
+  
+  // Apply fetch patch early - before useChat initializes
+  useLayoutEffect(() => {
+    if (wsEndpoint) {
+      applyWebSocketFetchPatch(wsEndpoint)
+    }
+  }, [wsEndpoint])
   
   const transport = useMemo(() => createWebSocketChatTransport({
     api: apiEndpoint,
