@@ -110,7 +110,7 @@ export const aiTools = {
         SNACK: "Snack"
       }
       
-      return meals.map(m => `${mealTypeLabels[m.type]}: ${m.dish.name}`).join("\n")
+      return meals.map(m => `${mealTypeLabels[m.type]}: ${m.dish?.name || m.customName || 'Unbekannt'}`).join("\n")
     },
   }),
 
@@ -146,7 +146,7 @@ export const aiTools = {
       }
       
       return meals.map(m => 
-        `${format(m.date, "EEEE, d.M.", { locale: de })} - ${mealTypeLabels[m.type]}: ${m.dish.name}`
+        `${format(m.date, "EEEE, d.M.", { locale: de })} - ${mealTypeLabels[m.type]}: ${m.dish?.name || m.customName || 'Unbekannt'}`
       ).join("\n")
     },
   }),
@@ -181,7 +181,7 @@ export const aiTools = {
             data: { dishId },
             include: { dish: true }
           })
-          return `[REFRESH] Mahlzeit aktualisiert: ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealType}: ${updated.dish.name}`
+          return `[REFRESH] Mahlzeit aktualisiert: ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealType}: ${updated.dish?.name || 'Unbekannt'}`
         }
         
         const meal = await db.meal.create({
@@ -193,7 +193,7 @@ export const aiTools = {
           include: { dish: true }
         })
         
-        return `[REFRESH] Mahlzeit hinzugefügt: ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealType}: ${meal.dish.name}`
+        return `[REFRESH] Mahlzeit hinzugefügt: ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealType}: ${meal.dish?.name || 'Unbekannt'}`
       } catch (error) {
         return `Fehler beim Hinzufügen der Mahlzeit: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
       }
@@ -291,7 +291,7 @@ export const aiTools = {
       }
       
       return meals.map(m => 
-        `${format(m.date, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[m.type]}): ${m.dish.name}`
+        `${format(m.date, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[m.type]}): ${m.dish?.name || m.customName || 'Unbekannt'}`
       ).join("\n")
     },
   }),
@@ -327,7 +327,7 @@ export const aiTools = {
         BREAKFAST: "Frühstück", LUNCH: "Mittagessen", DINNER: "Abendessen", SNACK: "Snack"
       }
       
-      return `Gefunden: ${meal.dish.name} am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealTypeLabels[mealType]} (Meal-ID: ${meal.id})`
+      return `Gefunden: ${meal.dish?.name || meal.customName || 'Unbekannt'} am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} - ${mealTypeLabels[mealType]} (Meal-ID: ${meal.id})`
     },
   }),
 
@@ -362,7 +362,7 @@ export const aiTools = {
         BREAKFAST: "Frühstück", LUNCH: "Mittagessen", DINNER: "Abendessen", SNACK: "Snack"
       }
       
-      return `VORSCHAU LÖSCHEN: "${meal.dish.name}" am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[mealType]}). Frage den Nutzer ob er das wirklich löschen möchte!`
+      return `VORSCHAU LÖSCHEN: "${meal.dish?.name || meal.customName || 'Unbekannt'}" am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[mealType]}). Frage den Nutzer ob er das wirklich löschen möchte!`
     },
   }),
 
@@ -402,7 +402,7 @@ export const aiTools = {
         
         await db.meal.delete({ where: { id: meal.id } })
         
-        return `[REFRESH] Gelöscht: "${meal.dish.name}" am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[mealType]})`
+        return `[REFRESH] Gelöscht: "${meal.dish?.name || meal.customName || 'Unbekannt'}" am ${format(mealDate, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[mealType]})`
       } catch (error) {
         return `Fehler beim Löschen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
       }
@@ -445,7 +445,7 @@ export const aiTools = {
       }
       
       const preview = meals.map(m => 
-        `- ${format(m.date, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[m.type]}): ${m.dish.name}`
+        `- ${format(m.date, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[m.type]}): ${m.dish?.name || m.customName || 'Unbekannt'}`
       ).join("\n")
       
       return `VORSCHAU LÖSCHEN (${meals.length} Einträge):\n${preview}\n\nFrage den Nutzer ob er diese ${meals.length} Einträge wirklich löschen möchte!`
@@ -538,7 +538,7 @@ export const aiTools = {
         })
         
         if (targetMeal) {
-          return `Fehler: Am ${format(toDateParsed, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[toMealType]}) ist bereits "${targetMeal.dish.name}" geplant. Bitte zuerst diesen Eintrag löschen oder ein anderes Ziel wählen.`
+          return `Fehler: Am ${format(toDateParsed, "EEEE, d. MMMM", { locale: de })} (${mealTypeLabels[toMealType]}) ist bereits "${targetMeal.dish?.name || targetMeal.customName || 'Unbekannt'}" geplant. Bitte zuerst diesen Eintrag löschen oder ein anderes Ziel wählen.`
         }
         
         await db.meal.update({
@@ -549,7 +549,7 @@ export const aiTools = {
           }
         })
         
-        return `[REFRESH] Verschoben: "${sourceMeal.dish.name}" von ${format(fromDateParsed, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[fromMealType]}) nach ${format(toDateParsed, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[toMealType]})`
+        return `[REFRESH] Verschoben: "${sourceMeal.dish?.name || sourceMeal.customName || 'Unbekannt'}" von ${format(fromDateParsed, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[fromMealType]}) nach ${format(toDateParsed, "EEEE, d.M.", { locale: de })} (${mealTypeLabels[toMealType]})`
       } catch (error) {
         return `Fehler beim Verschieben: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
       }
@@ -607,7 +607,7 @@ export const aiTools = {
           })
         ])
         
-        return `[REFRESH] Getauscht: "${meal1.dish.name}" (${format(date1Parsed, "d.M.", { locale: de })} ${mealTypeLabels[mealType1]}) ↔ "${meal2.dish.name}" (${format(date2Parsed, "d.M.", { locale: de })} ${mealTypeLabels[mealType2]})`
+        return `[REFRESH] Getauscht: "${meal1.dish?.name || meal1.customName || 'Unbekannt'}" (${format(date1Parsed, "d.M.", { locale: de })} ${mealTypeLabels[mealType1]}) ↔ "${meal2.dish?.name || meal2.customName || 'Unbekannt'}" (${format(date2Parsed, "d.M.", { locale: de })} ${mealTypeLabels[mealType2]})`
       } catch (error) {
         return `Fehler beim Tauschen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
       }
