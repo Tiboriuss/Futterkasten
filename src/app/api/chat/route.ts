@@ -80,6 +80,14 @@ export async function POST(req: Request) {
        - Sei prägnant und freundlich
        - Nutze Tools für aktuelle Daten, rate nicht
        - mealType ist: BREAKFAST, LUNCH, DINNER oder SNACK
+    
+    7. KEINE UNAUFGEFORDERTEN VORSCHLÄGE:
+       - Mache NUR das, was der Nutzer explizit fragt
+       - Schlage NICHT von dir aus zusätzliche Aktionen vor (z.B. "Soll ich noch eine Einkaufsliste erstellen?")
+       - Biete KEINE weiteren Features oder Funktionen an, die nicht angefragt wurden
+       - Wenn du Rückfragen hast oder Infos brauchst, frage NUR nach dem was für die aktuelle Aufgabe relevant ist
+       - Halte deine Antworten kurz und auf den Punkt - keine ausschweifenden Erklärungen oder Zusatzangebote
+       - Der Nutzer weiß welche Funktionen die App hat und wird danach fragen wenn er sie braucht
     `,
   })
 
