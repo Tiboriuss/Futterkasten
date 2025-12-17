@@ -1,7 +1,8 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
-import { WebSocketChatTransport } from "@/lib/websocket-chat-transport"
+import { createWebSocketChatTransport } from "@/lib/websocket-chat-transport"
+import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -42,11 +43,13 @@ export function AIChat() {
   
   const wsEndpoint = `${basePath}/api/chat/ws`
   
+  const transport = useMemo(() => createWebSocketChatTransport({
+    api: apiEndpoint,
+    wsEndpoint: wsEndpoint,
+  }), [apiEndpoint, wsEndpoint])
+  
   const chat = useChat({
-    transport: new WebSocketChatTransport({
-      api: apiEndpoint,
-      wsEndpoint: wsEndpoint,
-    }),
+    transport,
     onError: (error: any) => console.error("Chat error:", error),
   } as any)
   
