@@ -6,7 +6,7 @@ import { deleteDish } from "@/app/actions/dishes"
 import { Pencil, Trash2, Search } from "lucide-react"
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Ingredient, Dish, DishIngredient } from "@prisma/client"
+import { Ingredient, Dish, DishIngredient, MealType } from "@prisma/client"
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ interface DishWithIngredients {
   id: string
   name: string
   description: string | null
-  suitableFor: string[]
+  suitableFor: MealType[]
   createdAt: Date
   updatedAt: Date
   userId: string
