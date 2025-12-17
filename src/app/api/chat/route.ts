@@ -84,10 +84,16 @@ export async function POST(req: Request) {
   const response = result.toUIMessageStreamResponse()
   
   // Ensure headers for real-time streaming in HA Ingress
-  response.headers.set('Content-Type', 'text/event-stream')
-  response.headers.set('Cache-Control', 'no-cache, no-transform')
+  response.headers.set('Content-Type', 'text/event-stream; charset=utf-8')
+  response.headers.set('Cache-Control', 'no-cache, no-store, no-transform, must-revalidate')
   response.headers.set('Connection', 'keep-alive')
-  response.headers.set('X-Accel-Buffering', 'no') // Disable HA Proxy buffering
+  response.headers.set('X-Accel-Buffering', 'no') // Disable HA Supervisor proxy buffering
+  
+  // Prevent HA Core from compressing the stream
+  response.headers.set('Content-Encoding', 'identity')
+  
+  // Delete Content-Length if present to force chunked transfer (required for streaming)
+  response.headers.delete('Content-Length')
   
   return response
 }
