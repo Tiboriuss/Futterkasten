@@ -26,13 +26,13 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
 # Install prisma CLI
 RUN npm install -g prisma@5.22.0
 
-# Copy nginx config, run script, and WebSocket proxy
+# Copy nginx config and run script
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY run.sh /run.sh
-COPY ws-proxy.js /ws-proxy.js
 RUN chmod a+x /run.sh
 
-# Install ws package locally for WebSocket proxy
+# Copy WebSocket proxy to /app and install ws package
+COPY ws-proxy.js /app/ws-proxy.js
 RUN cd /app && npm install ws
 
 CMD ["/run.sh"]

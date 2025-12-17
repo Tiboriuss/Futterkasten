@@ -50,7 +50,7 @@ sleep 3
 
 # Start WebSocket proxy for AI chat streaming (bypasses HA Core compression)
 bashio::log.info "Starting WebSocket proxy for AI chat..."
-cd /app && node /ws-proxy.js &
+node /app/ws-proxy.js &
 
 # Start nginx (foreground to keep container running)
 bashio::log.info "Starting nginx ingress proxy..."
