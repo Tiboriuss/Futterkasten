@@ -1,7 +1,7 @@
 {
   "name": "Futterkasten",
   "description": "Meal planning app with AI assistant",
-  "version": "1.0.60",
+  "version": "1.0.61",
   "slug": "futterkasten",
   "url": "https://github.com/Tiboriuss/Futterkasten",
   "arch": ["amd64", "aarch64"],
@@ -10,6 +10,7 @@
   "host_network": false,
   "ingress": true,
   "ingress_port": 8099,
+  "ingress_stream": true,
   "panel_icon": "mdi:food",
   "panel_title": "Futterkasten",
   "ports": {
