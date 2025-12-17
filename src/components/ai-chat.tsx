@@ -1,6 +1,7 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -40,7 +41,12 @@ export function AIChat() {
   const apiEndpoint = `${basePath}/api/chat`
   
   const chat = useChat({
-    api: apiEndpoint,
+    transport: new DefaultChatTransport({
+      api: apiEndpoint,
+      headers: {
+        'Accept-Encoding': 'identity', // Prevent HA Core from compressing SSE stream
+      },
+    }),
     onError: (error: any) => console.error("Chat error:", error),
   } as any)
   
