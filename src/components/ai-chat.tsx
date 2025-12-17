@@ -159,13 +159,14 @@ export function AIChat() {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-4 right-4 z-50 w-[400px] bg-background border rounded-lg shadow-xl transition-all duration-300 ease-in-out transform",
+          "fixed z-50 bg-background border shadow-xl transition-all duration-300 ease-in-out transform",
+          "inset-0 md:inset-auto md:bottom-4 md:right-4 md:w-[400px] md:rounded-lg",
           isOpen
             ? "translate-y-0 opacity-100"
-            : "translate-y-[120%] opacity-0 pointer-events-none"
+            : "translate-y-full md:translate-y-[120%] opacity-0 pointer-events-none"
         )}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
@@ -180,7 +181,7 @@ export function AIChat() {
           </Button>
         </div>
 
-        <div className="h-[400px] p-4 overflow-y-auto" ref={scrollRef}>
+        <div className="h-[calc(100vh-140px)] md:h-[400px] p-3 md:p-4 overflow-y-auto" ref={scrollRef}>
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-4 gap-2">
                 <Bot className="h-10 w-10 opacity-20" />
@@ -306,7 +307,7 @@ export function AIChat() {
           </div>
         </div>
 
-        <div className="p-4 border-t">
+        <div className="p-3 md:p-4 border-t">
           <form 
             onSubmit={handleSend} 
             className="flex gap-2"
@@ -315,7 +316,7 @@ export function AIChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Frag nach den Mampf Bot..."
-              className="flex-1"
+              className="flex-1 text-base md:text-sm"
             />
             <Button type="submit" size="icon" disabled={isLoading}>
               <Send className="h-4 w-4" />
