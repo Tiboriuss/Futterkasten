@@ -28,7 +28,7 @@ export function DishCreateButton({ availableIngredients }: DishCreateButtonProps
           <Plus className="mr-2 h-4 w-4" /> Neues Gericht
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Neues Gericht erstellen</DialogTitle>
           <DialogDescription className="sr-only">

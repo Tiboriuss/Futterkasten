@@ -61,10 +61,10 @@ export function IngredientList({ ingredients }: IngredientListProps) {
         />
       </div>
       <div className="border rounded-md">
-        <div className="grid grid-cols-12 border-b p-4 font-medium text-sm">
-          <div className="col-span-8">Name</div>
-          <div className="col-span-2">Einheit</div>
-          <div className="col-span-2 text-right">Aktionen</div>
+        <div className="grid grid-cols-12 border-b p-3 md:p-4 font-medium text-sm">
+          <div className="col-span-5 md:col-span-6">Name</div>
+          <div className="col-span-3 md:col-span-3">Einheit</div>
+          <div className="col-span-4 md:col-span-3 text-right">Aktionen</div>
         </div>
         {filteredIngredients.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
@@ -73,10 +73,10 @@ export function IngredientList({ ingredients }: IngredientListProps) {
         ) : (
         <div className="divide-y">
           {filteredIngredients.map((ingredient) => (
-          <div key={ingredient.id} className="grid grid-cols-12 p-4 items-center text-sm">
-            <div className="col-span-8 font-medium">{ingredient.name}</div>
-            <div className="col-span-2 text-muted-foreground">{ingredient.unit}</div>
-            <div className="col-span-2 text-right flex items-center justify-end gap-1">
+          <div key={ingredient.id} className="grid grid-cols-12 p-3 md:p-4 items-center text-sm">
+            <div className="col-span-5 md:col-span-6 font-medium truncate pr-2">{ingredient.name}</div>
+            <div className="col-span-3 md:col-span-3 text-muted-foreground truncate">{ingredient.unit}</div>
+            <div className="col-span-4 md:col-span-3 text-right flex items-center justify-end gap-0 md:gap-1">
               <Dialog open={editingId === ingredient.id} onOpenChange={(open) => setEditingId(open ? ingredient.id : null)}>
                 <DialogTrigger asChild>
                     <Button variant="ghost" size="icon">
