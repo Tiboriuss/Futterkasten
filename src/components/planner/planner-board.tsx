@@ -63,17 +63,28 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
+  // Fetch meals function
+  const fetchMeals = async () => {
+    setIsLoading(true)
+    const result = await getMealsForWeek(currentDate)
+    if (result.success && result.data) {
+      setMeals(result.data as MealWithDish[])
+    }
+    setIsLoading(false)
+  }
+
   // Fetch meals when week changes
   useEffect(() => {
-    const fetchMeals = async () => {
-      setIsLoading(true)
-      const result = await getMealsForWeek(currentDate)
-      if (result.success && result.data) {
-        setMeals(result.data as MealWithDish[])
-      }
-      setIsLoading(false)
-    }
     fetchMeals()
+  }, [currentDate])
+
+  // Listen for AI-triggered meal updates
+  useEffect(() => {
+    const handleMealsUpdated = () => {
+      fetchMeals()
+    }
+    window.addEventListener('meals-updated', handleMealsUpdated)
+    return () => window.removeEventListener('meals-updated', handleMealsUpdated)
   }, [currentDate])
 
   const handlePreviousWeek = () => setCurrentDate((prev) => addDays(prev, -7))

@@ -90,6 +90,8 @@ export function AIChat() {
             // Small delay to let the AI finish responding
             setTimeout(() => {
               router.refresh()
+              // Also dispatch custom event for components with local state
+              window.dispatchEvent(new CustomEvent('meals-updated'))
             }, 500)
           }
         }
