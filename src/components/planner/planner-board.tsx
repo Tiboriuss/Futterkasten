@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MealType, Dish, Meal, DishIngredient, Ingredient } from "@prisma/client"
 import { addMeal, addCustomMeal, removeMeal, getMealsForWeek } from "@/app/actions/planner"
-import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -139,6 +138,7 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
                       type={type} 
                       meal={meal} 
                       dishes={dishes}
+                      onMealsChanged={fetchMeals}
                    />
                  )
                })}
@@ -174,6 +174,7 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
                         meal={meal} 
                         dishes={dishes}
                         compact
+                        onMealsChanged={fetchMeals}
                       />
                     </div>
                   </div>
@@ -187,8 +188,7 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
   )
 }
 
-function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date, type: MealType, meal?: MealWithDish, dishes: DishWithIngredients[], compact?: boolean }) {
-  const router = useRouter()
+function PlannerSlot({ date, type, meal, dishes, compact = false, onMealsChanged }: { date: Date, type: MealType, meal?: MealWithDish, dishes: DishWithIngredients[], compact?: boolean, onMealsChanged?: () => void }) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
   const [customInput, setCustomInput] = useState("")
@@ -197,7 +197,7 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
   const handleAddMeal = async (dishId: string) => {
     await addMeal({ date, type, dishId })
     setSearchOpen(false)
-    router.refresh()
+    onMealsChanged?.()
   }
 
   const handleAddCustomMeal = async () => {
@@ -206,7 +206,7 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
     setCustomInput("")
     setShowCustomInput(false)
     setSearchOpen(false)
-    router.refresh()
+    onMealsChanged?.()
   }
 
   // Get display name - either dish name or custom name
@@ -219,7 +219,7 @@ function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date
     if (meal) {
       if (!confirm("Mahlzeit wirklich entfernen?")) return
       await removeMeal(meal.id)
-      router.refresh()
+      onMealsChanged?.()
     }
   }
 
