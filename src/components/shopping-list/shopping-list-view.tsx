@@ -66,23 +66,25 @@ export function ShoppingListView({ initialData, from, to }: ShoppingListViewProp
             <Button
               variant={"outline"}
               className={cn(
-                "w-[300px] justify-start text-left font-normal",
+                "w-full sm:w-[300px] justify-start text-left font-normal",
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date?.from ? (
-                date.to ? (
-                  <>
-                    {format(date.from, "d. MMM y", { locale: de })} -{" "}
-                    {format(date.to, "d. MMM y", { locale: de })}
-                  </>
+              <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "d. MMM", { locale: de })} -{" "}
+                      {format(date.to, "d. MMM y", { locale: de })}
+                    </>
+                  ) : (
+                    format(date.from, "d. MMM y", { locale: de })
+                  )
                 ) : (
-                  format(date.from, "d. MMM y", { locale: de })
-                )
-              ) : (
-                <span>Zeitraum wählen</span>
-              )}
+                  "Zeitraum wählen"
+                )}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -92,8 +94,19 @@ export function ShoppingListView({ initialData, from, to }: ShoppingListViewProp
               defaultMonth={date?.from}
               selected={date}
               onSelect={handleDateSelect}
+              numberOfMonths={1}
+              locale={de}
+              className="md:hidden"
+            />
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={date?.from}
+              selected={date}
+              onSelect={handleDateSelect}
               numberOfMonths={2}
               locale={de}
+              className="hidden md:block"
             />
           </PopoverContent>
         </Popover>

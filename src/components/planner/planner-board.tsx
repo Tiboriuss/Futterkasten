@@ -64,7 +64,7 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold capitalize">
+        <h2 className="text-lg md:text-xl font-bold capitalize">
           {format(weekStart, "d. MMM", { locale: de })} - {format(weekEnd, "d. MMM yyyy", { locale: de })}
         </h2>
         <div className="flex gap-2">
@@ -77,7 +77,8 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto border rounded-lg bg-background">
+      {/* Desktop Grid View */}
+      <div className="hidden md:block flex-1 overflow-auto border rounded-lg bg-background">
         <div className="grid grid-cols-8 min-w-[800px] h-full divide-x divide-y">
            {/* Header Row */}
            <div className="p-2 font-medium text-muted-foreground bg-muted/50"></div>
@@ -116,11 +117,48 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
            ))}
         </div>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden flex-1 overflow-auto space-y-4">
+        {days.map((day) => (
+          <div key={day.toISOString()} className="border rounded-lg bg-background overflow-hidden">
+            <div className="p-3 bg-muted/50 border-b">
+              <div className="font-medium capitalize">
+                {format(day, "EEEE", { locale: de })}, {format(day, "d. MMM", { locale: de })}
+              </div>
+            </div>
+            <div className="divide-y">
+              {mealTypes.map((type) => {
+                const meal = meals.find(m => {
+                  const mDate = new Date(m.date)
+                  return isSameDay(mDate, day) && m.type === type
+                })
+                return (
+                  <div key={`${day.toISOString()}_${type}`} className="flex items-center">
+                    <div className="w-24 shrink-0 p-2 text-xs uppercase text-muted-foreground font-medium bg-muted/20">
+                      {mealTypeLabels[type]}
+                    </div>
+                    <div className="flex-1">
+                      <PlannerSlot 
+                        date={day} 
+                        type={type} 
+                        meal={meal} 
+                        dishes={dishes}
+                        compact
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
-function PlannerSlot({ date, type, meal, dishes }: { date: Date, type: MealType, meal?: Meal & { dish: DishWithIngredients }, dishes: DishWithIngredients[] }) {
+function PlannerSlot({ date, type, meal, dishes, compact = false }: { date: Date, type: MealType, meal?: Meal & { dish: DishWithIngredients }, dishes: DishWithIngredients[], compact?: boolean }) {
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -144,17 +182,23 @@ function PlannerSlot({ date, type, meal, dishes }: { date: Date, type: MealType,
   if (meal) {
       return (
         <>
-          <div className="p-2 min-h-[100px] relative">
+          <div className={cn("p-2 relative", compact ? "min-h-[60px]" : "min-h-[100px]")}>
               <div 
-                className="h-full w-full bg-accent/40 hover:bg-accent/60 rounded-md p-2 text-xs flex flex-col justify-between transition-colors border border-transparent hover:border-accent cursor-pointer"
+                className={cn(
+                  "h-full w-full bg-accent/40 hover:bg-accent/60 rounded-md p-2 text-xs flex transition-colors border border-transparent hover:border-accent cursor-pointer",
+                  compact ? "flex-row items-center justify-between gap-2" : "flex-col justify-between"
+                )}
                 onClick={() => setDetailOpen(true)}
               >
-                 <span className="font-medium line-clamp-3">{meal.dish.name}</span>
+                 <span className={cn("font-medium", compact ? "line-clamp-1" : "line-clamp-3")}>{meal.dish.name}</span>
                  <Button 
                       type="button"
                       variant="ghost" 
                       size="icon" 
-                      className="h-6 w-6 self-end text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      className={cn(
+                        "text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0",
+                        compact ? "h-6 w-6" : "h-6 w-6 self-end"
+                      )}
                       onClick={handleRemove}
                       title="Mahlzeit entfernen"
                   >
@@ -204,7 +248,7 @@ function PlannerSlot({ date, type, meal, dishes }: { date: Date, type: MealType,
   }
 
   return (
-    <div className="p-2 min-h-[100px] flex items-center justify-center">
+    <div className={cn("p-2 flex items-center justify-center", compact ? "min-h-[60px]" : "min-h-[100px]")}>
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
             <PopoverTrigger asChild>
                 <Button 
@@ -215,7 +259,7 @@ function PlannerSlot({ date, type, meal, dishes }: { date: Date, type: MealType,
                     "text-muted-foreground/50 transition-all duration-200"
                   )}
                 >
-                    <Plus className="h-6 w-6" />
+                    <Plus className={compact ? "h-5 w-5" : "h-6 w-6"} />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0 w-[250px]" align="center">

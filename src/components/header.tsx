@@ -1,4 +1,7 @@
+"use client"
+
 import { MainNav } from "@/components/main-nav"
+import { MobileNav } from "@/components/mobile-nav"
 import { ModeToggle } from "@/components/mode-toggle"
 
 export default function Header() {
@@ -8,9 +11,10 @@ export default function Header() {
         <div className="flex items-center gap-2 font-bold text-xl mr-4">
           🥪 Futterkasten
         </div>
-        <MainNav className="mx-6" />
+        <MainNav className="mx-6 hidden md:flex" />
         <div className="ml-auto flex items-center space-x-4">
           <ModeToggle />
+          <MobileNav className="md:hidden" />
         </div>
       </div>
     </div>

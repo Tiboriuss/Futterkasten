@@ -277,8 +277,8 @@ export function ShoppingListsView({ initialLists, availableIngredients }: Shoppi
               </div>
               
               {/* Date range sync section */}
-              <div className="flex items-center gap-2 pt-2 border-t mt-4">
-                <span className="text-sm text-muted-foreground">Zeitraum:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t mt-4">
+                <span className="text-sm text-muted-foreground shrink-0">Zeitraum:</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -289,19 +289,21 @@ export function ShoppingListsView({ initialLists, availableIngredients }: Shoppi
                         !effectiveDateRange && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {effectiveDateRange?.from ? (
-                        effectiveDateRange.to ? (
-                          <>
-                            {format(effectiveDateRange.from, "d. MMM", { locale: de })} -{" "}
-                            {format(effectiveDateRange.to, "d. MMM", { locale: de })}
-                          </>
+                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="truncate">
+                        {effectiveDateRange?.from ? (
+                          effectiveDateRange.to ? (
+                            <>
+                              {format(effectiveDateRange.from, "d. MMM", { locale: de })} -{" "}
+                              {format(effectiveDateRange.to, "d. MMM", { locale: de })}
+                            </>
+                          ) : (
+                            format(effectiveDateRange.from, "d. MMM yyyy", { locale: de })
+                          )
                         ) : (
-                          format(effectiveDateRange.from, "d. MMM yyyy", { locale: de })
-                        )
-                      ) : (
-                        <span>Zeitraum wählen</span>
-                      )}
+                          "Zeitraum wählen"
+                        )}
+                      </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -318,8 +320,26 @@ export function ShoppingListsView({ initialLists, availableIngredients }: Shoppi
                           })
                         }
                       }}
+                      numberOfMonths={1}
+                      locale={de}
+                      className="md:hidden"
+                    />
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={effectiveDateRange?.from || new Date()}
+                      selected={effectiveDateRange || undefined}
+                      onSelect={(range) => {
+                        if (range?.from) {
+                          setDateRange({ 
+                            from: range.from, 
+                            to: range.to || range.from 
+                          })
+                        }
+                      }}
                       numberOfMonths={2}
                       locale={de}
+                      className="hidden md:block"
                     />
                   </PopoverContent>
                 </Popover>
@@ -327,8 +347,9 @@ export function ShoppingListsView({ initialLists, availableIngredients }: Shoppi
                   size="sm"
                   onClick={handleSyncFromDateRange}
                   disabled={!effectiveDateRange || isAddingFromPlan}
+                  className="shrink-0"
                 >
-                  {isAddingFromPlan ? "Synchronisiert..." : "Synchronisieren"}
+                  {isAddingFromPlan ? "..." : "Sync"}
                 </Button>
               </div>
             </CardHeader>
