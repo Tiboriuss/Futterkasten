@@ -1,5 +1,5 @@
 import { azure } from "@ai-sdk/azure"
-import { streamText, convertToModelMessages } from "ai"
+import { streamText, convertToModelMessages, stepCountIs } from "ai"
 import { aiTools } from "@/lib/ai/tools"
 
 // Allow streaming responses up to 60 seconds
@@ -12,8 +12,7 @@ export async function POST(req: Request) {
     model: azure(process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o"),
     messages: convertToModelMessages(messages),
     tools: aiTools,
-    // @ts-ignore - maxSteps is available in recent AI SDK versions but types might lag
-    maxSteps: 15,
+    stopWhen: stepCountIs(15),
     system: `Du bist Futterkasten AI, ein hilfreicher Koch-Assistent.
     Du hast Zugriff auf die Datenbank des Nutzers mit Zutaten, Gerichten und dem Wochenplan.
     
