@@ -48,6 +48,10 @@ DATABASE_URL="$DATABASE_URL" node server.js &
 bashio::log.info "Waiting for Next.js to start..."
 sleep 3
 
+# Start WebSocket proxy for AI chat streaming (bypasses HA Core compression)
+bashio::log.info "Starting WebSocket proxy for AI chat..."
+node /ws-proxy.js &
+
 # Start nginx (foreground to keep container running)
 bashio::log.info "Starting nginx ingress proxy..."
 exec nginx

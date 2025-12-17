@@ -1,7 +1,7 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+import { WebSocketChatTransport } from "@/lib/websocket-chat-transport"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -40,12 +40,12 @@ export function AIChat() {
   const basePath = useBasePath()
   const apiEndpoint = `${basePath}/api/chat`
   
+  const wsEndpoint = `${basePath}/api/chat/ws`
+  
   const chat = useChat({
-    transport: new DefaultChatTransport({
+    transport: new WebSocketChatTransport({
       api: apiEndpoint,
-      headers: {
-        'Accept-Encoding': 'identity', // Prevent HA Core from compressing SSE stream
-      },
+      wsEndpoint: wsEndpoint,
     }),
     onError: (error: any) => console.error("Chat error:", error),
   } as any)

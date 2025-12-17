@@ -7,7 +7,7 @@ RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx \
 WORKDIR /app
 
 # Cache bust - change this to force fresh clone
-ARG CACHEBUST=20251217-accept-encoding-client
+ARG CACHEBUST=20251217-websocket-streaming
 # Clone the repository and build
 RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cd /tmp/app \
@@ -26,9 +26,10 @@ RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
 # Install prisma CLI
 RUN npm install -g prisma@5.22.0
 
-# Copy nginx config and run script
+# Copy nginx config, run script, and WebSocket proxy
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY run.sh /run.sh
+COPY ws-proxy.js /ws-proxy.js
 RUN chmod a+x /run.sh
 
 CMD ["/run.sh"]
