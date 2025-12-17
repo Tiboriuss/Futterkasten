@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Fragment } from "react"
+import { useState, useEffect, Fragment } from "react"
 import { addDays, format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { de } from "date-fns/locale"
 import { ChevronLeft, ChevronRight, Plus, Trash2, Check } from "lucide-react"
@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MealType, Dish, Meal, DishIngredient, Ingredient } from "@prisma/client"
-import { addMeal, addCustomMeal, removeMeal } from "@/app/actions/planner"
+import { addMeal, addCustomMeal, removeMeal, getMealsForWeek } from "@/app/actions/planner"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -54,12 +54,27 @@ const mealTypeLabels: Record<MealType, string> = {
   [MealType.SNACK]: "Snack",
 }
 
-export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) {
+export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: PlannerBoardProps) {
   const [currentDate, setCurrentDate] = useState(initialDate)
+  const [meals, setMeals] = useState<MealWithDish[]>(initialMeals)
+  const [isLoading, setIsLoading] = useState(false)
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
+
+  // Fetch meals when week changes
+  useEffect(() => {
+    const fetchMeals = async () => {
+      setIsLoading(true)
+      const result = await getMealsForWeek(currentDate)
+      if (result.success && result.data) {
+        setMeals(result.data as MealWithDish[])
+      }
+      setIsLoading(false)
+    }
+    fetchMeals()
+  }, [currentDate])
 
   const handlePreviousWeek = () => setCurrentDate((prev) => addDays(prev, -7))
   const handleNextWeek = () => setCurrentDate((prev) => addDays(prev, 7))
@@ -81,7 +96,7 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
       </div>
 
       {/* Desktop Grid View */}
-      <div className="hidden md:block flex-1 overflow-auto border rounded-lg bg-background">
+      <div className={cn("hidden md:block flex-1 overflow-auto border rounded-lg bg-background", isLoading && "opacity-50 pointer-events-none")}>
         <div className="grid grid-cols-8 min-w-[800px] h-full divide-x divide-y">
            {/* Header Row */}
            <div className="p-2 font-medium text-muted-foreground bg-muted/50"></div>
@@ -122,7 +137,7 @@ export function PlannerBoard({ initialDate, meals, dishes }: PlannerBoardProps) 
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden flex-1 overflow-auto space-y-4">
+      <div className={cn("md:hidden flex-1 overflow-auto space-y-4", isLoading && "opacity-50 pointer-events-none")}>
         {days.map((day) => (
           <div key={day.toISOString()} className="border rounded-lg bg-background overflow-hidden">
             <div className="p-3 bg-muted/50 border-b">
