@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ Futterkasten
 
-## Getting Started
+**Futterkasten** ist eine Essensplanungs-App mit KI-Assistent für Home Assistant. Plane deine Mahlzeiten für die Woche, verwalte Gerichte und Zutaten, und lass dir von der KI beim Planen helfen.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Wochenplaner** - Plane Frühstück, Mittagessen, Abendessen und Snacks für jeden Tag
+- **Gerichte-Verwaltung** - Erstelle und verwalte deine Lieblingsgerichte mit Zutaten
+- **Zutaten-Datenbank** - Halte alle deine Zutaten organisiert
+- **KI-Assistent** - Lass dir von der KI beim Planen helfen ("Plane mir die Woche", "Was gibt es heute?")
+- **Einkaufsliste** - Automatische Einkaufsliste basierend auf deinem Wochenplan
+- **Mobile-optimiert** - Funktioniert perfekt auf Smartphone und Desktop
+- **Home Assistant Integration** - Läuft als Addon direkt in deinem Smart Home
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📋 Voraussetzungen
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Home Assistant** (OS oder Supervised Installation)
+- **PostgreSQL Datenbank** - Kann als separates Addon installiert werden
+- **Azure OpenAI API Key** - Für den KI-Assistenten (optional, aber empfohlen)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Installation in Home Assistant
 
-## Learn More
+### Schritt 1: Repository hinzufügen
 
-To learn more about Next.js, take a look at the following resources:
+1. Öffne Home Assistant
+2. Gehe zu **Einstellungen** → **Add-ons** → **Add-on Store**
+3. Klicke auf die drei Punkte oben rechts → **Repositories**
+4. Füge folgende URL hinzu:
+   ```
+   https://github.com/Tiboriuss/Futterkasten
+   ```
+5. Klicke auf **Hinzufügen**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Schritt 2: PostgreSQL installieren (falls noch nicht vorhanden)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Im Add-on Store nach **PostgreSQL** suchen
+2. Das offizielle PostgreSQL Addon installieren
+3. In der Konfiguration eine Datenbank erstellen:
+   ```yaml
+   databases:
+     - futterkasten
+   logins:
+     - username: futterkasten
+       password: dein_sicheres_passwort
+   rights:
+     - username: futterkasten
+       database: futterkasten
+   ```
+4. Addon starten
 
-## Deploy on Vercel
+### Schritt 3: Futterkasten installieren
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Im Add-on Store nach **Futterkasten** suchen (ggf. Seite neu laden)
+2. Addon installieren
+3. In der Konfiguration folgende Werte eintragen:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   | Option | Beschreibung |
+   |--------|-------------|
+   | `DATABASE_URL` | `postgresql://futterkasten:dein_passwort@core-postgres:5432/futterkasten` |
+   | `AZURE_OPENAI_API_KEY` | Dein Azure OpenAI API Key |
+   | `AZURE_OPENAI_ENDPOINT` | Dein Azure OpenAI Endpoint (z.B. `https://dein-name.openai.azure.com`) |
+   | `AZURE_OPENAI_DEPLOYMENT` | Name deines Deployments (z.B. `gpt-4o`) |
+
+4. Addon starten
+5. **In der Seitenleiste anzeigen** aktivieren
+
+### Schritt 4: Loslegen!
+
+Klicke auf **Futterkasten** in der Seitenleiste und beginne mit der Planung deiner Mahlzeiten!
+
+## 🤖 KI-Assistent
+
+Der KI-Assistent kann dir bei folgenden Aufgaben helfen:
+
+- "Was gibt es heute zu essen?"
+- "Zeig mir den Wochenplan"
+- "Plane mir Pasta für Montag Mittagessen"
+- "Trage Müsli für die ganze Woche als Frühstück ein"
+- "Verschiebe das Abendessen von Montag auf Dienstag"
+- "Lösche das Mittagessen am Freitag"
+
+Der Assistent nutzt nur Gerichte aus deiner eigenen Datenbank - er erfindet keine neuen Rezepte.
+
+## 🛠️ Technologie
+
+- **Frontend**: Next.js 15, React, TailwindCSS, shadcn/ui
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Datenbank**: PostgreSQL
+- **KI**: Azure OpenAI via Vercel AI SDK
+
+## 📝 Lizenz
+
+MIT License
