@@ -7,7 +7,7 @@ RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx \
 WORKDIR /app
 
 # Cache bust - change this to force fresh clone
-ARG CACHEBUST=20251217-mobile-layout-fix
+ARG CACHEBUST=20251220-sidebar-fix
 # Clone the repository and build
 RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cd /tmp/app \
