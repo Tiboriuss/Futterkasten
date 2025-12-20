@@ -13,6 +13,7 @@
   "ingress_stream": true,
   "panel_icon": "mdi:food",
   "panel_title": "Futterkasten",
+  "panel_admin": false,
   "ports": {
     "3000/tcp": null
   },
