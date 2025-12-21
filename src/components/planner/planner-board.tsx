@@ -131,12 +131,36 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
     const targetDate = new Date(targetDateStr)
     const mealId = active.id as string
 
-    // Optimistic update
-    const updatedMeals = meals.map(m => 
-      m.id === mealId 
-        ? { ...m, date: targetDate, type: targetType }
-        : m
-    )
+    // Find the meal being dragged
+    const draggedMeal = meals.find(m => m.id === mealId)
+    if (!draggedMeal) return
+
+    // Find meal at target slot (if any)
+    const targetMeal = meals.find(m => {
+      const mDate = new Date(m.date)
+      return isSameDay(mDate, targetDate) && m.type === targetType
+    })
+
+    // Optimistic update - swap meals
+    let updatedMeals: MealWithDish[]
+    if (targetMeal && targetMeal.id !== mealId) {
+      // Swap: move dragged to target, move target to dragged's original position
+      updatedMeals = meals.map(m => {
+        if (m.id === mealId) {
+          return { ...m, date: targetDate, type: targetType }
+        } else if (m.id === targetMeal.id) {
+          return { ...m, date: draggedMeal.date, type: draggedMeal.type }
+        }
+        return m
+      })
+    } else {
+      // Just move (target slot empty)
+      updatedMeals = meals.map(m => 
+        m.id === mealId 
+          ? { ...m, date: targetDate, type: targetType }
+          : m
+      )
+    }
     setMeals(updatedMeals as MealWithDish[])
 
     // Server update
