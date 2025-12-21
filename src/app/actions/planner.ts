@@ -181,6 +181,10 @@ export async function moveMeal(data: z.infer<typeof moveMealSchema>) {
       return { success: false, error: "Meal not found" }
     }
 
+    // Store original position
+    const originalDate = mealToMove.date
+    const originalType = mealToMove.type
+
     // Check if target slot already has a meal
     const existingMeal = await db.meal.findUnique({
       where: {
@@ -192,20 +196,40 @@ export async function moveMeal(data: z.infer<typeof moveMealSchema>) {
     })
 
     if (existingMeal && existingMeal.id !== mealId) {
-      // Target slot occupied - delete it first
+      // Target slot occupied - swap the meals
+      // First, move existing meal to a temporary state (delete from current slot)
       await db.meal.delete({
         where: { id: existingMeal.id },
       })
-    }
 
-    // Move the meal to new slot
-    await db.meal.update({
-      where: { id: mealId },
-      data: {
-        date: normalizedDate,
-        type: targetType,
-      },
-    })
+      // Move dragged meal to target slot
+      await db.meal.update({
+        where: { id: mealId },
+        data: {
+          date: normalizedDate,
+          type: targetType,
+        },
+      })
+
+      // Recreate the existing meal at the original position of dragged meal
+      await db.meal.create({
+        data: {
+          date: originalDate,
+          type: originalType,
+          dishId: existingMeal.dishId,
+          customName: existingMeal.customName,
+        },
+      })
+    } else {
+      // Target slot empty - just move
+      await db.meal.update({
+        where: { id: mealId },
+        data: {
+          date: normalizedDate,
+          type: targetType,
+        },
+      })
+    }
 
     revalidatePath("/planner")
     return { success: true }
