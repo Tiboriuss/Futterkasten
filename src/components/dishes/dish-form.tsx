@@ -360,7 +360,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                   control={form.control}
                   name={`ingredients.${index}.amount`}
                   render={({ field }) => (
-                    <FormItem className="w-full sm:w-24">
+                    <FormItem className="w-full sm:w-auto sm:min-w-[140px]">
                       <FormLabel className="sr-only">Menge</FormLabel>
                       <FormControl>
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
@@ -368,7 +368,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                             type="number" 
                             step="1" 
                             placeholder="Menge" 
-                            className="min-w-0 h-8 sm:h-9"
+                            className="min-w-0 h-8 sm:h-9 sm:w-20"
                             {...field} 
                           />
                            {selectedIngredient && (
