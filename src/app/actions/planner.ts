@@ -154,3 +154,63 @@ export async function removeMeal(id: string) {
     return { success: false, error: "Failed to remove meal" }
   }
 }
+
+const moveMealSchema = z.object({
+  mealId: z.string().min(1),
+  targetDate: z.date(),
+  targetType: z.nativeEnum(MealType),
+})
+
+export async function moveMeal(data: z.infer<typeof moveMealSchema>) {
+  const result = moveMealSchema.safeParse(data)
+
+  if (!result.success) {
+    return { success: false, error: "Invalid data" }
+  }
+
+  const { mealId, targetDate, targetType } = result.data
+  const normalizedDate = startOfDay(targetDate)
+
+  try {
+    // Get the meal to move
+    const mealToMove = await db.meal.findUnique({
+      where: { id: mealId },
+    })
+
+    if (!mealToMove) {
+      return { success: false, error: "Meal not found" }
+    }
+
+    // Check if target slot already has a meal
+    const existingMeal = await db.meal.findUnique({
+      where: {
+        date_type: {
+          date: normalizedDate,
+          type: targetType,
+        },
+      },
+    })
+
+    if (existingMeal && existingMeal.id !== mealId) {
+      // Target slot occupied - delete it first
+      await db.meal.delete({
+        where: { id: existingMeal.id },
+      })
+    }
+
+    // Move the meal to new slot
+    await db.meal.update({
+      where: { id: mealId },
+      data: {
+        date: normalizedDate,
+        type: targetType,
+      },
+    })
+
+    revalidatePath("/planner")
+    return { success: true }
+  } catch (error) {
+    console.error("Move Meal Error:", error)
+    return { success: false, error: "Failed to move meal" }
+  }
+}

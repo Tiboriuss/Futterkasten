@@ -30,6 +30,9 @@ import { Ingredient } from "@prisma/client"
 const units = [
   { label: "Gramm (g)", value: "g" },
   { label: "Milliliter (ml)", value: "ml" },
+  { label: "Becher", value: "Becher" },
+  { label: "Teelöffel", value: "Teelöffel" },
+  { label: "Esslöffel", value: "Esslöffel" },
   { label: "Stück", value: "Stück" },
   { label: "Packung", value: "Packung" },
 ]

@@ -5,11 +5,12 @@ import { addDays, format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay }
 import { de } from "date-fns/locale"
 import { ChevronLeft, ChevronRight, Plus, Trash2, Check } from "lucide-react"
 import ReactMarkdown from "react-markdown"
+import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, useDraggable, useDroppable } from "@dnd-kit/core"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MealType, Dish, Meal, DishIngredient, Ingredient } from "@prisma/client"
-import { addMeal, addCustomMeal, removeMeal, getMealsForWeek } from "@/app/actions/planner"
+import { addMeal, addCustomMeal, removeMeal, getMealsForWeek, moveMeal } from "@/app/actions/planner"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -57,6 +58,16 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
   const [currentDate, setCurrentDate] = useState(initialDate)
   const [meals, setMeals] = useState<MealWithDish[]>(initialMeals)
   const [isLoading, setIsLoading] = useState(false)
+  const [activeMeal, setActiveMeal] = useState<MealWithDish | null>(null)
+
+  // Configure drag sensors (desktop only - require 10px movement to start drag)
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    })
+  )
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
@@ -89,6 +100,54 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
   const handlePreviousWeek = () => setCurrentDate((prev) => addDays(prev, -7))
   const handleNextWeek = () => setCurrentDate((prev) => addDays(prev, 7))
 
+  const handleDragStart = (event: any) => {
+    const mealId = event.active.id
+    const meal = meals.find(m => m.id === mealId)
+    if (meal) {
+      setActiveMeal(meal)
+    }
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveMeal(null)
+    
+    const { active, over } = event
+    
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    // Parse drop target ID (format: "day-YYYY-MM-DD-type-MEALTYPE")
+    const dropId = over.id as string
+    const parts = dropId.split('-')
+    
+    if (parts[0] !== 'day' || parts.length < 6) {
+      return
+    }
+
+    const targetDateStr = `${parts[1]}-${parts[2]}-${parts[3]}`
+    const targetType = parts[5] as MealType
+    
+    const targetDate = new Date(targetDateStr)
+    const mealId = active.id as string
+
+    // Optimistic update
+    const updatedMeals = meals.map(m => 
+      m.id === mealId 
+        ? { ...m, date: targetDate, type: targetType }
+        : m
+    )
+    setMeals(updatedMeals as MealWithDish[])
+
+    // Server update
+    const result = await moveMeal({ mealId, targetDate, targetType })
+    
+    if (!result.success) {
+      // Revert on error
+      await fetchMeals()
+    }
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       <div className="flex items-center justify-between mb-4">
@@ -106,8 +165,9 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
       </div>
 
       {/* Desktop Grid View */}
-      <div className={cn("hidden md:block flex-1 overflow-auto border rounded-lg bg-background", isLoading && "opacity-50 pointer-events-none")}>
-        <div className="grid grid-cols-8 min-w-[800px] h-full divide-x divide-y">
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className={cn("hidden md:block flex-1 overflow-auto border rounded-lg bg-background", isLoading && "opacity-50 pointer-events-none")}>
+          <div className="grid grid-cols-8 min-w-[800px] h-full divide-x divide-y">
            {/* Header Row */}
            <div className="p-2 font-medium text-muted-foreground bg-muted/50"></div>
            {days.map((day) => (
@@ -146,6 +206,14 @@ export function PlannerBoard({ initialDate, meals: initialMeals, dishes }: Plann
            ))}
         </div>
       </div>
+      <DragOverlay>
+        {activeMeal ? (
+          <div className="bg-accent/80 border border-accent rounded-md p-2 text-xs font-medium shadow-lg">
+            {activeMeal.dish?.name || activeMeal.customName}
+          </div>
+        ) : null}
+      </DragOverlay>
+      </DndContext>
 
       {/* Mobile Card View */}
       <div className={cn("md:hidden flex-1 overflow-auto space-y-4", isLoading && "opacity-50 pointer-events-none")}>
@@ -194,6 +262,20 @@ function PlannerSlot({ date, type, meal, dishes, compact = false, onMealsChanged
   const [customInput, setCustomInput] = useState("")
   const [showCustomInput, setShowCustomInput] = useState(false)
 
+  // Create unique drop zone ID
+  const dropId = `day-${format(date, 'yyyy-MM-dd')}-type-${type}`
+  
+  // Make slot droppable
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: dropId,
+  })
+
+  // Make meal draggable (only if meal exists and not on mobile)
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
+    id: meal?.id || '',
+    disabled: !meal || compact, // Disable drag on mobile (compact mode)
+  })
+
   const handleAddMeal = async (dishId: string) => {
     await addMeal({ date, type, dishId })
     setSearchOpen(false)
@@ -226,14 +308,19 @@ function PlannerSlot({ date, type, meal, dishes, compact = false, onMealsChanged
   if (meal) {
       return (
         <>
-          <div className={cn("p-2 relative", compact ? "min-h-[60px]" : "min-h-[100px]")}>
+          <div ref={setDropRef} className={cn("p-2 relative", compact ? "min-h-[60px]" : "min-h-[100px]", isOver && "bg-primary/10")}>
               <div 
+                ref={setDragRef}
+                {...attributes}
+                {...listeners}
                 className={cn(
-                  "h-full w-full rounded-md p-2 text-xs flex transition-colors border border-transparent cursor-pointer",
+                  "h-full w-full rounded-md p-2 text-xs flex transition-colors border border-transparent",
                   isCustomMeal 
                     ? "bg-muted/60 hover:bg-muted/80 hover:border-muted-foreground/30" 
                     : "bg-accent/40 hover:bg-accent/60 hover:border-accent",
-                  compact ? "flex-row items-center justify-between gap-2" : "flex-col justify-between"
+                  compact ? "flex-row items-center justify-between gap-2" : "flex-col justify-between",
+                  !compact && "cursor-grab active:cursor-grabbing",
+                  isDragging && "opacity-50"
                 )}
                 onClick={() => !isCustomMeal && setDetailOpen(true)}
               >
@@ -300,7 +387,7 @@ function PlannerSlot({ date, type, meal, dishes, compact = false, onMealsChanged
   }
 
   return (
-    <div className={cn("p-2 flex items-center justify-center", compact ? "min-h-[60px]" : "min-h-[100px]")}>
+    <div ref={setDropRef} className={cn("p-2 flex items-center justify-center", compact ? "min-h-[60px]" : "min-h-[100px]", isOver && "bg-primary/10")}>
         <Popover open={searchOpen} onOpenChange={(open) => {
           setSearchOpen(open)
           if (!open) {
