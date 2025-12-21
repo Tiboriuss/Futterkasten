@@ -363,15 +363,16 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                     <FormItem className="w-full sm:w-24">
                       <FormLabel className="sr-only">Menge</FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                           <Input 
                             type="number" 
-                            step="0.1" 
+                            step="1" 
                             placeholder="Menge" 
+                            className="min-w-0"
                             {...field} 
                           />
                            {selectedIngredient && (
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            <span className="text-xs text-muted-foreground sm:whitespace-nowrap max-w-full truncate">
                               {selectedIngredient.unit}
                             </span>
                           )}
