@@ -74,6 +74,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
   const [newIngredientUnit, setNewIngredientUnit] = useState("")
   const [newIngredientForIndex, setNewIngredientForIndex] = useState<number | null>(null)
   const [creatingIngredient, setCreatingIngredient] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
   const router = useRouter()
   
   const handleCreateIngredient = async () => {
@@ -284,8 +285,12 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-[300px] p-0">
-                          <Command>
-                            <CommandInput placeholder="Zutat suchen..." />
+                          <Command shouldFilter={false}>
+                            <CommandInput 
+                              placeholder="Zutat suchen..." 
+                              value={searchTerm}
+                              onValueChange={setSearchTerm}
+                            />
                             <CommandList>
                                 <CommandEmpty>
                                   <div className="p-2 text-center">
@@ -296,6 +301,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                                       size="sm"
                                       onClick={() => {
                                         setNewIngredientForIndex(index)
+                                        setNewIngredientName(searchTerm)
                                         setNewIngredientDialogOpen(true)
                                       }}
                                     >
@@ -305,7 +311,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                                   </div>
                                 </CommandEmpty>
                                 <CommandGroup>
-                                {availableIngredients.map((ingredient) => (
+                                {availableIngredients.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).map((ingredient) => (
                                     <CommandItem
                                     value={ingredient.name} // Search by name
                                     key={ingredient.id}
@@ -329,6 +335,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                                   <CommandItem
                                     onSelect={() => {
                                       setNewIngredientForIndex(index)
+                                      setNewIngredientName(searchTerm)
                                       setNewIngredientDialogOpen(true)
                                     }}
                                     className="text-muted-foreground"
@@ -358,10 +365,11 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                             type="number" 
                             step="0.1" 
                             placeholder="Menge" 
+                            className="pr-10"
                             {...field} 
                           />
                            {selectedIngredient && (
-                            <span className="absolute right-3 top-2 text-xs text-muted-foreground">
+                            <span className="absolute right-8 top-2 text-xs text-muted-foreground pointer-events-none">
                               {selectedIngredient.unit}
                             </span>
                           )}

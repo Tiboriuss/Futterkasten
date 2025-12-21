@@ -98,7 +98,7 @@ export function DishList({ dishes, availableIngredients }: DishListProps) {
                             <Pencil className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Gericht bearbeiten</DialogTitle>
                             <DialogDescription className="sr-only">
