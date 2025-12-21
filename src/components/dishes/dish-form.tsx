@@ -56,6 +56,9 @@ import { Label } from "@/components/ui/label"
 const UNITS = [
   { label: "Gramm (g)", value: "g" },
   { label: "Milliliter (ml)", value: "ml" },
+  { label: "Becher", value: "Becher" },
+  { label: "Teelöffel", value: "Teelöffel" },
+  { label: "Esslöffel", value: "Esslöffel" },
   { label: "Stück", value: "Stück" },
   { label: "Packung", value: "Packung" },
 ]
@@ -257,7 +260,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
              const selectedIngredient = availableIngredients.find(i => i.id === currentIngredientId)
 
              return (
-              <div key={field.id} className="flex gap-4 items-end">
+              <div key={field.id} className="flex flex-col sm:flex-row gap-4 sm:items-end">
                 <FormField
                   control={form.control}
                   name={`ingredients.${index}.ingredientId`}
@@ -284,7 +287,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[calc(95vw-2rem)] sm:w-[300px] p-0">
                           <Command shouldFilter={false}>
                             <CommandInput 
                               placeholder="Zutat suchen..." 
@@ -357,19 +360,18 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                   control={form.control}
                   name={`ingredients.${index}.amount`}
                   render={({ field }) => (
-                    <FormItem className="w-24">
+                    <FormItem className="w-full sm:w-24">
                       <FormLabel className="sr-only">Menge</FormLabel>
                       <FormControl>
-                        <div className="relative">
+                        <div className="flex items-center gap-2">
                           <Input 
                             type="number" 
                             step="0.1" 
                             placeholder="Menge" 
-                            className="pr-10"
                             {...field} 
                           />
                            {selectedIngredient && (
-                            <span className="absolute right-8 top-2 text-xs text-muted-foreground pointer-events-none">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {selectedIngredient.unit}
                             </span>
                           )}
