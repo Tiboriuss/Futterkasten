@@ -274,7 +274,7 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                               variant="outline"
                               role="combobox"
                               className={cn(
-                                "w-full justify-between",
+                                "w-full justify-between h-8 px-3 text-sm sm:h-9 sm:px-4",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -368,11 +368,11 @@ export function DishForm({ availableIngredients: initialIngredients, dish, after
                             type="number" 
                             step="1" 
                             placeholder="Menge" 
-                            className="min-w-0"
+                            className="min-w-0 h-8 sm:h-9"
                             {...field} 
                           />
                            {selectedIngredient && (
-                            <span className="text-xs text-muted-foreground sm:whitespace-nowrap max-w-full truncate">
+                            <span className="text-xs text-muted-foreground sm:whitespace-nowrap">
                               {selectedIngredient.unit}
                             </span>
                           )}
