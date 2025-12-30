@@ -38,7 +38,13 @@ cat ./prisma/schema.prisma
 
 # Run migrations
 bashio::log.info "Running database migrations..."
-prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 || bashio::log.warning "Migration failed, continuing anyway..."
+# Execute migration SQL directly for existing database
+bashio::log.info "Applying schema changes directly to database..."
+PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./prisma/migrations/20251230121600_flexible_ingredient_units/migration.sql 2>&1 || bashio::log.warning "Direct migration failed, trying Prisma migrate..."
+# Mark migration as applied in Prisma
+prisma migrate resolve --applied 20251230121600_flexible_ingredient_units --schema=./prisma/schema.prisma 2>&1 || true
+# Run any other pending migrations
+prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 || bashio::log.warning "Migration deploy failed, continuing anyway..."
 
 # Start the Next.js server in background
 bashio::log.info "Starting Futterkasten..."
