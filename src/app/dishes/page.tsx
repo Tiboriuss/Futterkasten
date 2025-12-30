@@ -2,6 +2,7 @@ import { getDishes, getAvailableUnits } from "@/app/actions/dishes"
 import { getIngredients } from "@/app/actions/ingredients"
 import { DishList } from "@/components/dishes/dish-list"
 import { DishCreateButton } from "@/components/dishes/dish-create-button"
+import { Suspense } from "react"
 
 export const dynamic = "force-dynamic"
 
@@ -18,7 +19,9 @@ export default async function DishesPage() {
       </div>
       <p className="text-muted-foreground">Erstelle und verwalte deine Lieblingsrezepte.</p>
       
-      <DishList dishes={dishes as any || []} availableIngredients={ingredients || []} availableUnits={units || []} />
+      <Suspense fallback={<div>Lädt...</div>}>
+        <DishList dishes={dishes as any || []} availableIngredients={ingredients || []} availableUnits={units || []} />
+      </Suspense>
     </div>
   )
 }
