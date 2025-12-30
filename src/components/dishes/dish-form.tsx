@@ -283,7 +283,11 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                         placeholder="Menge" 
                         className="h-9"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value === 0 ? '' : field.value}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          field.onChange(value === '' ? 0 : parseFloat(value))
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault()
