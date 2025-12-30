@@ -214,16 +214,9 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                             value={field.value}
                             onValueChange={field.onChange}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === 'Tab') {
+                              // Let cmdk handle Enter to select highlighted item
+                              if (e.key === 'Tab') {
                                 e.preventDefault()
-                                // Select first matching suggestion if available
-                                const firstMatch = availableIngredients.find(ing => 
-                                  ing.name.toLowerCase().includes(field.value?.toLowerCase() || "")
-                                )
-                                if (firstMatch) {
-                                  field.onChange(firstMatch.name)
-                                }
-                                // Move to amount field
                                 const amountInput = document.querySelector(`input[name="ingredients.${index}.amount"]`) as HTMLInputElement
                                 if (amountInput) amountInput.focus()
                               }
@@ -247,6 +240,11 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                                     value={ingredient.name}
                                     onSelect={() => {
                                       field.onChange(ingredient.name)
+                                      // Move to amount field after selection
+                                      setTimeout(() => {
+                                        const amountInput = document.querySelector(`input[name="ingredients.${index}.amount"]`) as HTMLInputElement
+                                        if (amountInput) amountInput.focus()
+                                      }, 0)
                                     }}
                                   >
                                     <Check
@@ -329,16 +327,9 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                             value={field.value}
                             onValueChange={field.onChange}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === 'Tab') {
+                              // Let cmdk handle Enter to select highlighted item
+                              if (e.key === 'Tab') {
                                 e.preventDefault()
-                                // Select first matching suggestion if available
-                                const firstMatch = availableUnits.find(unit => 
-                                  unit.toLowerCase().includes(field.value?.toLowerCase() || "")
-                                )
-                                if (firstMatch) {
-                                  field.onChange(firstMatch)
-                                }
-                                // Close popover by clicking outside or triggering blur
                                 const trigger = document.activeElement?.closest('[role="combobox"]') as HTMLElement
                                 if (trigger) trigger.blur()
                               }
@@ -359,7 +350,14 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                                   <CommandItem
                                     key={unit}
                                     value={unit}
-                                    onSelect={() => field.onChange(unit)}
+                                    onSelect={() => {
+                                      field.onChange(unit)
+                                      // Close popover after selection
+                                      setTimeout(() => {
+                                        const trigger = document.activeElement?.closest('[role="combobox"]') as HTMLElement
+                                        if (trigger) trigger.blur()
+                                      }, 0)
+                                    }}
                                   >
                                     <Check
                                       className={cn(
