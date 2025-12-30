@@ -382,7 +382,7 @@ export function ShoppingListsView({ initialLists, availableIngredients }: Shoppi
                 ) : (
                   selectedList.items.map((item) => {
                     const displayName = item.ingredient?.name || item.customName || "Unbekannt"
-                    const displayAmount = item.amount ? `${item.amount} ${item.unit || item.ingredient?.unit || ''}` : ''
+                    const displayAmount = item.amount ? `${item.amount} ${item.unit || ''}` : ''
                     
                     return (
                       <div
