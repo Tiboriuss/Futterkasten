@@ -226,6 +226,14 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === 'Tab') {
                                 e.preventDefault()
+                                // Select first matching suggestion if available
+                                const firstMatch = availableIngredients.find(ing => 
+                                  ing.name.toLowerCase().includes(field.value?.toLowerCase() || "")
+                                )
+                                if (firstMatch) {
+                                  field.onChange(firstMatch.name)
+                                }
+                                // Move to amount field
                                 const amountInput = document.querySelector(`input[name="ingredients.${index}.amount"]`) as HTMLInputElement
                                 if (amountInput) amountInput.focus()
                               }
@@ -333,6 +341,13 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === 'Tab') {
                                 e.preventDefault()
+                                // Select first matching suggestion if available
+                                const firstMatch = availableUnits.find(unit => 
+                                  unit.toLowerCase().includes(field.value?.toLowerCase() || "")
+                                )
+                                if (firstMatch) {
+                                  field.onChange(firstMatch)
+                                }
                                 // Close popover by clicking outside or triggering blur
                                 const trigger = document.activeElement?.closest('[role="combobox"]') as HTMLElement
                                 if (trigger) trigger.blur()
