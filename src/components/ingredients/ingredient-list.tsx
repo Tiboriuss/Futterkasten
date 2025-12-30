@@ -177,17 +177,6 @@ export function IngredientList({ ingredients }: IngredientListProps) {
                   </div>
                 </DialogContent>
               </Dialog>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(ingredient.id)}
-                disabled={deletingId === ingredient.id || ingredient.dishes.length > 0}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                title={ingredient.dishes.length > 0 ? "Zutat wird noch verwendet" : "Zutat löschen"}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         ))}

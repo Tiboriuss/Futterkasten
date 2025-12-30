@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { deleteDish } from "@/app/actions/dishes"
 import { Pencil, Trash2, Search } from "lucide-react"
-import { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useMemo, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Ingredient, Dish, DishIngredient, MealType } from "@prisma/client"
 import {
   Dialog,
@@ -43,6 +43,17 @@ export function DishList({ dishes, availableIngredients, availableUnits }: DishL
   const [editingId, setEditingId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for edit parameter in URL and auto-open dialog
+  useEffect(() => {
+    const editId = searchParams.get('edit')
+    if (editId && dishes.find(d => d.id === editId)) {
+      setEditingId(editId)
+      // Clear the URL parameter
+      router.replace('/dishes', { scroll: false })
+    }
+  }, [searchParams, dishes, router])
 
   const filteredDishes = useMemo(() => {
     if (!search.trim()) return dishes
