@@ -385,7 +385,7 @@ function PlannerSlot({ date, type, meal, dishes, compact = false, onMealsChanged
                         {meal.dish.ingredients.map((di: any) => (
                           <li key={di.id} className="text-sm flex justify-between">
                             <span>{di.ingredient.name}</span>
-                            <span className="text-muted-foreground">{di.amount} {di.ingredient.unit}</span>
+                            <span className="text-muted-foreground">{di.amount} {di.unit}</span>
                           </li>
                         ))}
                       </ul>

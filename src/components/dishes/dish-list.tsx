@@ -136,7 +136,7 @@ export function DishList({ dishes, availableIngredients }: DishListProps) {
                 {dish.ingredients.map((item, idx) => (
                   <li key={idx} className="flex justify-between text-muted-foreground">
                     <span>{item.ingredient.name}</span>
-                    <span>{item.amount} {item.ingredient.unit}</span>
+                    <span>{item.amount} {item.unit}</span>
                   </li>
                 ))}
                 {dish.ingredients.length === 0 && (
