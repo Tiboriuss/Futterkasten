@@ -38,6 +38,11 @@ cat ./prisma/schema.prisma
 
 # Run migrations
 bashio::log.info "Running database migrations..."
+
+# First, resolve any failed migrations from previous attempts
+bashio::log.info "Checking for failed migrations..."
+prisma migrate resolve --rolled-back 20251215134005_init --schema=./prisma/schema.prisma 2>&1 || true
+
 # Try to run migrations normally (for fresh databases)
 if prisma migrate deploy --schema=./prisma/schema.prisma 2>&1; then
   bashio::log.info "Migrations deployed successfully"

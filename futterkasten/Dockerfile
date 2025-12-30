@@ -1,13 +1,13 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/base:stable
 FROM ${BUILD_FROM}
 
-RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx \
+RUN apk add --no-cache nodejs npm libc6-compat openssl git nginx postgresql-client \
     && mkdir -p /run/nginx
 
 WORKDIR /app
 
 # Cache bust - change this to force fresh clone
-ARG CACHEBUST=20251230-migration-exec-fix
+ARG CACHEBUST=20251230-psql-fix
 # Clone the repository and build
 RUN git clone --depth 1 https://github.com/Tiboriuss/Futterkasten.git /tmp/app \
     && cd /tmp/app \
