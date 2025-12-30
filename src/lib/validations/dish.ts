@@ -8,8 +8,9 @@ export const dishSchema = z.object({
   suitableFor: z.array(z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"])).default([]),
   ingredients: z.array(
     z.object({
-      ingredientId: z.string().min(1, "Zutat ist erforderlich"),
+      ingredientName: z.string().min(1, "Zutat ist erforderlich"),
       amount: z.coerce.number().min(0.1, "Menge muss größer als 0 sein"),
+      unit: z.string().min(1, "Einheit ist erforderlich"),
     })
   ).default([]),
 })

@@ -18,14 +18,27 @@ export const aiTools = {
   }),
 
   listIngredients: tool({
-    description: "List all available ingredients in the pantry/storage",
+    description: "List all available ingredients. Note: Ingredients don't have fixed units - each dish can use different units for the same ingredient (e.g., 100ml oil or 2 EL oil).",
     inputSchema: z.object({
       _placeholder: z.string().optional().describe("Unused parameter"),
     }),
     execute: async () => {
-      const ingredients = await db.ingredient.findMany()
-      if (ingredients.length === 0) return "Keine Zutaten im Vorrat gefunden."
-      return ingredients.map(i => `${i.name} (${i.unit})`).join(", ")
+      const ingredients = await db.ingredient.findMany({
+        include: {
+          dishes: {
+            include: {
+              dish: {
+                select: { name: true }
+              }
+            }
+          }
+        }
+      })
+      if (ingredients.length === 0) return "Keine Zutaten vorhanden. Zutaten werden automatisch erstellt, wenn Gerichte angelegt werden."
+      return ingredients.map(i => {
+        const dishCount = i.dishes.length
+        return `${i.name} (verwendet in ${dishCount} Gericht${dishCount !== 1 ? 'en' : ''})`
+      }).join(", ")
     },
   }),
 
@@ -52,7 +65,7 @@ export const aiTools = {
       }
       // Return structured data - AI uses IDs internally, user sees clean names
       const dishList = dishes.map(d => {
-        const ings = d.ingredients.map((i: any) => `${i.amount}${i.ingredient.unit} ${i.ingredient.name}`).join(", ")
+        const ings = d.ingredients.map((i: any) => `${i.amount}${i.unit} ${i.ingredient.name}`).join(", ")
         const tags = d.suitableFor.length > 0 ? `[${d.suitableFor.join(", ")}]` : ""
         return `• ${d.name} ${tags}${d.description ? ` - ${d.description}` : ""}${ings ? ` (Zutaten: ${ings})` : ""}`
       }).join("\n")

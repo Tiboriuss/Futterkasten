@@ -8,6 +8,18 @@ import { ingredientSchema } from "@/lib/validations/ingredient"
 export async function getIngredients() {
   try {
     const ingredients = await db.ingredient.findMany({
+      include: {
+        dishes: {
+          include: {
+            dish: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { name: "asc" },
     })
     return { success: true, data: ingredients }

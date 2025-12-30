@@ -109,21 +109,26 @@ export async function syncIngredientsFromDateRange(
     })
 
     // Aggregate ingredients from meals
+    // Note: Different dishes may use different units for the same ingredient
+    // We create separate entries for each ingredient+unit combination
     const aggregated: Record<string, { ingredientId: string; amount: number; unit: string }> = {}
 
     for (const meal of meals) {
       if (!meal.dish) continue
 
       for (const dishIngredient of meal.dish.ingredients) {
-        const { ingredient, amount } = dishIngredient
+        const { ingredient, amount, unit } = dishIngredient
         
-        if (aggregated[ingredient.id]) {
-          aggregated[ingredient.id].amount += amount
+        // Use ingredient ID + unit as key to handle same ingredient with different units
+        const key = `${ingredient.id}__${unit}`
+        
+        if (aggregated[key]) {
+          aggregated[key].amount += amount
         } else {
-          aggregated[ingredient.id] = {
+          aggregated[key] = {
             ingredientId: ingredient.id,
             amount: amount,
-            unit: ingredient.unit,
+            unit: unit,
           }
         }
       }
@@ -240,7 +245,8 @@ export async function addCustomItem(
 export async function addIngredientItem(
   listId: string,
   ingredientId: string,
-  amount?: number
+  amount?: number,
+  unit?: string
 ) {
   try {
     const ingredient = await db.ingredient.findUnique({
@@ -251,11 +257,12 @@ export async function addIngredientItem(
       return { success: false, error: "Ingredient not found" }
     }
 
-    // Check if item already exists
+    // Check if item already exists with same unit
     const existing = await db.shoppingListItem.findFirst({
       where: {
         shoppingListId: listId,
         ingredientId: ingredientId,
+        unit: unit || null,
       }
     })
 
@@ -277,7 +284,7 @@ export async function addIngredientItem(
         shoppingListId: listId,
         ingredientId,
         amount,
-        unit: ingredient.unit,
+        unit: unit || "Stück",
       },
       include: { ingredient: true }
     })

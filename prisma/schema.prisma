@@ -72,7 +72,6 @@ model Dish {
 model Ingredient {
   id                String             @id @default(cuid())
   name              String             @unique
-  unit              String             @default("g") // g, kg, ml, l, pcs, tsp, tbsp
   dishes            DishIngredient[]
   shoppingListItems ShoppingListItem[]
   createdAt         DateTime           @default(now())
@@ -84,6 +83,7 @@ model DishIngredient {
   dishId       String
   ingredientId String
   amount       Float
+  unit         String     // Free-text unit per dish (e.g., "g", "ml", "EL", "Prise")
   dish         Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
 

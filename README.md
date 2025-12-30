@@ -87,6 +87,7 @@ Der Assistent nutzt nur Gerichte aus deiner eigenen Datenbank - er erfindet kein
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Datenbank**: PostgreSQL
 - **KI**: Azure OpenAI via Vercel AI SDK
+- **API**: GET /api/meals?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
 
 ## 📝 Lizenz
 

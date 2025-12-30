@@ -34,19 +34,43 @@ export async function createDish(data: z.infer<typeof dishSchema>) {
   const { name, description, suitableFor, ingredients } = result.data
 
   try {
-    await db.dish.create({
-      data: {
-        name,
-        description,
-        suitableFor: suitableFor,
-        ingredients: {
-          create: ingredients.map((item) => ({
-            ingredientId: item.ingredientId,
+    await db.$transaction(async (tx) => {
+      // 1. Create or find ingredients
+      const ingredientIds = await Promise.all(
+        ingredients.map(async (item) => {
+          // Try to find existing ingredient
+          let ingredient = await tx.ingredient.findUnique({
+            where: { name: item.ingredientName },
+          })
+
+          // If not found, create it
+          if (!ingredient) {
+            ingredient = await tx.ingredient.create({
+              data: { name: item.ingredientName },
+            })
+          }
+
+          return {
+            ingredientId: ingredient.id,
             amount: item.amount,
-          })),
+            unit: item.unit,
+          }
+        })
+      )
+
+      // 2. Create dish with ingredients
+      await tx.dish.create({
+        data: {
+          name,
+          description,
+          suitableFor: suitableFor,
+          ingredients: {
+            create: ingredientIds,
+          },
         },
-      },
+      })
     })
+
     revalidatePath("/dishes")
     return { success: true }
   } catch (error) {
@@ -77,20 +101,62 @@ export async function updateDish(id: string, data: z.infer<typeof dishSchema>) {
         },
       })
 
-      // 2. Delete existing ingredients
+      // 2. Get old ingredient IDs before deleting
+      const oldDishIngredients = await tx.dishIngredient.findMany({
+        where: { dishId: id },
+        select: { ingredientId: true },
+      })
+      const oldIngredientIds = oldDishIngredients.map(di => di.ingredientId)
+
+      // 3. Delete existing dish ingredients
       await tx.dishIngredient.deleteMany({
         where: { dishId: id },
       })
 
-      // 3. Create new ingredients
+      // 4. Create or find new ingredients
       if (ingredients.length > 0) {
+        const ingredientData = await Promise.all(
+          ingredients.map(async (item) => {
+            // Try to find existing ingredient
+            let ingredient = await tx.ingredient.findUnique({
+              where: { name: item.ingredientName },
+            })
+
+            // If not found, create it
+            if (!ingredient) {
+              ingredient = await tx.ingredient.create({
+                data: { name: item.ingredientName },
+              })
+            }
+
+            return {
+              dishId: id,
+              ingredientId: ingredient.id,
+              amount: item.amount,
+              unit: item.unit,
+            }
+          })
+        )
+
+        // 5. Create new dish ingredients
         await tx.dishIngredient.createMany({
-          data: ingredients.map((item) => ({
-            dishId: id,
-            ingredientId: item.ingredientId,
-            amount: item.amount,
-          })),
+          data: ingredientData,
         })
+      }
+
+      // 6. Clean up orphaned ingredients (ingredients with no dishes)
+      for (const ingredientId of oldIngredientIds) {
+        const dishCount = await tx.dishIngredient.count({
+          where: { ingredientId },
+        })
+        
+        if (dishCount === 0) {
+          await tx.ingredient.delete({
+            where: { id: ingredientId },
+          }).catch(() => {
+            // Ignore errors if ingredient is still referenced elsewhere
+          })
+        }
       }
     })
 
@@ -104,9 +170,35 @@ export async function updateDish(id: string, data: z.infer<typeof dishSchema>) {
 
 export async function deleteDish(id: string) {
   try {
-    await db.dish.delete({
-      where: { id },
+    await db.$transaction(async (tx) => {
+      // 1. Get ingredient IDs before deleting dish
+      const dishIngredients = await tx.dishIngredient.findMany({
+        where: { dishId: id },
+        select: { ingredientId: true },
+      })
+      const ingredientIds = dishIngredients.map(di => di.ingredientId)
+
+      // 2. Delete dish (cascade will delete DishIngredients)
+      await tx.dish.delete({
+        where: { id },
+      })
+
+      // 3. Clean up orphaned ingredients
+      for (const ingredientId of ingredientIds) {
+        const dishCount = await tx.dishIngredient.count({
+          where: { ingredientId },
+        })
+        
+        if (dishCount === 0) {
+          await tx.ingredient.delete({
+            where: { id: ingredientId },
+          }).catch(() => {
+            // Ignore errors if ingredient is still referenced elsewhere
+          })
+        }
+      }
     })
+
     revalidatePath("/dishes")
     return { success: true }
   } catch (error) {
