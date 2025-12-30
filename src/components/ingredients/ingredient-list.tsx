@@ -111,14 +111,19 @@ export function IngredientList({ ingredients }: IngredientListProps) {
               ) : (
                 <div className="flex flex-wrap gap-1">
                   {ingredient.dishes.slice(0, 3).map((di) => (
-                    <Link 
-                      key={di.dish.id} 
-                      href={`/dishes?edit=${di.dish.id}`}
-                      className="text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded inline-flex items-center gap-1"
+                    <button
+                      key={di.dish.id}
+                      onClick={() => {
+                        const url = new URL(window.location.href)
+                        url.pathname = url.pathname.replace(/\/ingredients.*$/, '/dishes')
+                        url.search = `?edit=${di.dish.id}`
+                        window.location.href = url.toString()
+                      }}
+                      className="text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer"
                     >
                       {di.dish.name}
                       <ExternalLink className="h-3 w-3" />
-                    </Link>
+                    </button>
                   ))}
                   {ingredient.dishes.length > 3 && (
                     <span className="text-xs text-muted-foreground px-2 py-1">
