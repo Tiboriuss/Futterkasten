@@ -35,9 +35,10 @@ interface DishWithIngredients {
 interface DishListProps {
   dishes: DishWithIngredients[]
   availableIngredients: Ingredient[]
+  availableUnits: string[]
 }
 
-export function DishList({ dishes, availableIngredients }: DishListProps) {
+export function DishList({ dishes, availableIngredients, availableUnits }: DishListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
@@ -106,7 +107,8 @@ export function DishList({ dishes, availableIngredients }: DishListProps) {
                             </DialogDescription>
                         </DialogHeader>
                         <DishForm 
-                            availableIngredients={availableIngredients} 
+                            availableIngredients={availableIngredients}
+                            availableUnits={availableUnits}
                             dish={dish} 
                             afterSave={() => setEditingId(null)} 
                         />

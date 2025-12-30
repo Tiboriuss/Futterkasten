@@ -24,6 +24,20 @@ export async function getDishes() {
   }
 }
 
+export async function getAvailableUnits() {
+  try {
+    const dishIngredients = await db.dishIngredient.findMany({
+      select: { unit: true },
+      distinct: ['unit'],
+    })
+    const units = dishIngredients.map(di => di.unit).filter(Boolean)
+    return { success: true, data: units }
+  } catch (error) {
+    console.error("Get Available Units Error:", error)
+    return { success: false, error: "Fehler beim Laden der Einheiten", data: [] }
+  }
+}
+
 export async function createDish(data: z.infer<typeof dishSchema>) {
   const result = dishSchema.safeParse(data)
 

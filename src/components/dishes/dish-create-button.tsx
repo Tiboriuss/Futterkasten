@@ -16,9 +16,10 @@ import { useState } from "react"
 
 interface DishCreateButtonProps {
   availableIngredients: Ingredient[]
+  availableUnits: string[]
 }
 
-export function DishCreateButton({ availableIngredients }: DishCreateButtonProps) {
+export function DishCreateButton({ availableIngredients, availableUnits }: DishCreateButtonProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -36,7 +37,8 @@ export function DishCreateButton({ availableIngredients }: DishCreateButtonProps
           </DialogDescription>
         </DialogHeader>
         <DishForm 
-          availableIngredients={availableIngredients} 
+          availableIngredients={availableIngredients}
+          availableUnits={availableUnits}
           afterSave={() => setOpen(false)} 
         />
       </DialogContent>

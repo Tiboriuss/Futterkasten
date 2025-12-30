@@ -36,30 +36,14 @@ import { Ingredient, Dish, DishIngredient } from "@prisma/client"
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const COMMON_UNITS = [
-  "g",
-  "kg", 
-  "ml",
-  "l",
-  "Stück",
-  "Packung",
-  "Becher",
-  "Teelöffel",
-  "TL",
-  "Esslöffel",
-  "EL",
-  "Prise",
-  "Bund",
-  "Dose",
-]
-
 interface DishFormProps {
   availableIngredients: Ingredient[]
+  availableUnits: string[]
   dish?: Dish & { ingredients: (DishIngredient & { ingredient: Ingredient })[] }
   afterSave?: () => void
 }
 
-export function DishForm({ availableIngredients, dish, afterSave }: DishFormProps) {
+export function DishForm({ availableIngredients, availableUnits, dish, afterSave }: DishFormProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -203,7 +187,7 @@ export function DishForm({ availableIngredients, dish, afterSave }: DishFormProp
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => append({ ingredientName: "", amount: 0, unit: "" })}
+              onClick={() => append({ ingredientName: "", amount: 1, unit: "" })}
             >
               Zutat hinzufügen
             </Button>
@@ -239,6 +223,13 @@ export function DishForm({ availableIngredients, dish, afterSave }: DishFormProp
                             placeholder="Zutat suchen oder neu eingeben..." 
                             value={field.value}
                             onValueChange={field.onChange}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === 'Tab') {
+                                e.preventDefault()
+                                const amountInput = document.querySelector(`input[name="ingredients.${index}.amount"]`) as HTMLInputElement
+                                if (amountInput) amountInput.focus()
+                              }
+                            }}
                           />
                           <CommandList>
                             <CommandEmpty>
@@ -293,6 +284,13 @@ export function DishForm({ availableIngredients, dish, afterSave }: DishFormProp
                         className="h-9"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            const unitButton = document.querySelector(`button[role="combobox"][class*="ingredients.${index}.unit"]`) as HTMLButtonElement
+                            if (unitButton) unitButton.click()
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -328,6 +326,14 @@ export function DishForm({ availableIngredients, dish, afterSave }: DishFormProp
                             placeholder="Einheit eingeben..." 
                             value={field.value}
                             onValueChange={field.onChange}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === 'Tab') {
+                                e.preventDefault()
+                                // Close popover by clicking outside or triggering blur
+                                const trigger = document.activeElement?.closest('[role="combobox"]') as HTMLElement
+                                if (trigger) trigger.blur()
+                              }
+                            }}
                           />
                           <CommandList>
                             <CommandEmpty>
@@ -336,7 +342,7 @@ export function DishForm({ availableIngredients, dish, afterSave }: DishFormProp
                               </div>
                             </CommandEmpty>
                             <CommandGroup>
-                              {COMMON_UNITS
+                              {availableUnits
                                 .filter(unit => 
                                   unit.toLowerCase().includes(field.value?.toLowerCase() || "")
                                 )

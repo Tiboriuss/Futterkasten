@@ -36,9 +36,9 @@ cd /app
 bashio::log.info "Checking schema content..."
 cat ./prisma/schema.prisma
 
-# Push schema to database
-bashio::log.info "Syncing database schema..."
-prisma db push --schema=./prisma/schema.prisma --accept-data-loss 2>&1 || bashio::log.warning "Schema push failed, continuing anyway..."
+# Run migrations
+bashio::log.info "Running database migrations..."
+prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 || bashio::log.warning "Migration failed, continuing anyway..."
 
 # Start the Next.js server in background
 bashio::log.info "Starting Futterkasten..."
