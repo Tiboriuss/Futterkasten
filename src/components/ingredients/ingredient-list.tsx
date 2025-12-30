@@ -113,7 +113,7 @@ export function IngredientList({ ingredients }: IngredientListProps) {
                   {ingredient.dishes.slice(0, 3).map((di) => (
                     <Link 
                       key={di.dish.id} 
-                      href="/dishes"
+                      href={`/dishes?edit=${di.dish.id}`}
                       className="text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded inline-flex items-center gap-1"
                     >
                       {di.dish.name}

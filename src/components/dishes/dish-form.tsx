@@ -377,16 +377,6 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
                   </FormItem>
                 )}
               />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="shrink-0 h-9 w-9"
-                onClick={() => remove(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           ))}
 
