@@ -38,13 +38,20 @@ cat ./prisma/schema.prisma
 
 # Run migrations
 bashio::log.info "Running database migrations..."
-# Execute migration SQL directly for existing database
-bashio::log.info "Applying schema changes directly to database..."
-PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./prisma/migrations/20251230121600_flexible_ingredient_units/migration.sql 2>&1 || bashio::log.warning "Direct migration failed, trying Prisma migrate..."
-# Mark migration as applied in Prisma
-prisma migrate resolve --applied 20251230121600_flexible_ingredient_units --schema=./prisma/schema.prisma 2>&1 || true
-# Run any other pending migrations
-prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 || bashio::log.warning "Migration deploy failed, continuing anyway..."
+# Try to run migrations normally (for fresh databases)
+if prisma migrate deploy --schema=./prisma/schema.prisma 2>&1; then
+  bashio::log.info "Migrations deployed successfully"
+else
+  bashio::log.warning "Migration deploy failed (likely existing DB with data), applying manually..."
+  # For existing databases: apply SQL directly then mark as resolved
+  bashio::log.info "Executing migration SQL directly..."
+  if PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./prisma/migrations/20251230121600_flexible_ingredient_units/migration.sql 2>&1; then
+    bashio::log.info "Migration SQL executed successfully, marking as applied..."
+    prisma migrate resolve --applied 20251230121600_flexible_ingredient_units --schema=./prisma/schema.prisma 2>&1 || true
+  else
+    bashio::log.error "Manual migration failed! Database may be in inconsistent state."
+  fi
+fi
 
 # Start the Next.js server in background
 bashio::log.info "Starting Futterkasten..."
