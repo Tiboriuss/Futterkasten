@@ -181,17 +181,7 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
         />
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <FormLabel>Zutaten</FormLabel>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ ingredientName: "", amount: 1, unit: "" })}
-            >
-              Zutat hinzufügen
-            </Button>
-          </div>
+          <FormLabel>Zutaten</FormLabel>
 
           {fields.map((field, index) => (
             <div key={field.id} className="flex flex-col sm:flex-row gap-2 sm:gap-4 sm:items-start p-4 border rounded-lg">
@@ -401,6 +391,16 @@ export function DishForm({ availableIngredients, availableUnits, dish, afterSave
               </Button>
             </div>
           ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => append({ ingredientName: "", amount: 1, unit: "" })}
+            className="w-full"
+          >
+            Zutat hinzufügen
+          </Button>
         </div>
 
         <Button type="submit" disabled={loading} className="w-full">
